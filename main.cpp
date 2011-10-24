@@ -47,13 +47,17 @@ int main(int argc, char *argv[])
         capture >> frame;
         Mat threshed = GetThresholdedImage(frame);
         vector<Vec3f> storage;
+        erode(threshed, threshed, 0, Point(-1, -1), 5);
+        dilate(threshed, threshed, 0, Point(-1, -1), 5);
         GaussianBlur(threshed, threshed, Size(7,7), 1.5, 1.5);
         HoughCircles(threshed, storage, CV_HOUGH_GRADIENT, 2, threshed.cols, 200, 100);
-        qDebug() << "size" << storage.size();
+        //qDebug() << "size" << storage.size();
         for (size_t i = 0; i < storage.size(); i++) {
-            qDebug() << "circle:" << storage[i][0] << ", " << storage[i][1] << ", " << storage[i][2];
+            //qDebug() << "circle:" << storage[i][0] << ", " << storage[i][1] << ", " << storage[i][2];
             circle(frame, Point2f(storage[i][0], storage[i][1]), storage[i][2], color, 2);
         }
+        flip(frame, frame, 1);
+        flip(threshed, threshed, 1);
         imshow( "mywindow", frame );
         imshow( "thresh", threshed );
         //If ESC key pressed, Key=0x10001B under OpenCV 0.9.7(linux version),
