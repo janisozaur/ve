@@ -16,8 +16,12 @@ QMAKE_CXXFLAGS += `pkg-config opencv --cflags`
 INCLUDEPATH += `pkg-config opencv --cflags-only-I` /usr/include/opencv
 
 SOURCES += main.cpp\
-        MainWindow.cpp
+        MainWindow.cpp \
+    BallTrackingThread.cpp
 
-HEADERS  += MainWindow.h
+HEADERS  += MainWindow.h \
+    BallTrackingThread.h
 
 FORMS    += MainWindow.ui
+
+
