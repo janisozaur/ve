@@ -69,8 +69,8 @@ void BallTrackingThread::run()
         mCapture >> frame;
         Mat threshed = GetThresholdedImage(frame);
         std::vector<Vec3f> storage;
-        //erode(threshed, threshed, 0, Point(-1, -1), mDilutionIterations);
-        //dilate(threshed, threshed, 0, Point(-1, -1), mErosionIterations);
+        erode(threshed, threshed, Mat(), Point(-1, -1), mDilutionIterations);
+        dilate(threshed, threshed, Mat(), Point(-1, -1), mErosionIterations);
 
         GaussianBlur(threshed, threshed, Size(7,7), 1.5, 1.5);
         HoughCircles(threshed, storage, CV_HOUGH_GRADIENT, 2, threshed.cols, 200, 100);
