@@ -7,11 +7,14 @@
 using namespace cv;
 
 BallTrackingThread::BallTrackingThread(QObject *parent) :
-    QThread(parent), mDilutionIterations(0), mErosionIterations(0), mRunning(true)
+    QThread(parent), mDilutionIterations(0), mErosionIterations(0), mRunning(true),
+    mLower(QColor::fromHsv(180, 30, 80)), mUpper(QColor::fromHsv(270, 255, 255))
 {
     if (!mCapture.open(0)) {
         this->mRunning = false;
     }
+    setLowerBound(mLower);
+    setUpperBound(mUpper);
     qDebug() << "running:" << mRunning;
 }
 
@@ -28,11 +31,17 @@ QColor BallTrackingThread::getUpperBound() const
 void BallTrackingThread::setLowerBound(const QColor color)
 {
     mLower = color;
+    mLower.getHsv(&mLowerVec[0], &mLowerVec[1], &mLowerVec[2]);
+    mLowerVec[0] /= 2;
+    qDebug() << "lower" << mLower.toHsv();
 }
 
 void BallTrackingThread::setUpperBound(const QColor color)
 {
     mUpper = color;
+    mUpper.getHsv(&mUpperVec[0], &mUpperVec[1], &mUpperVec[2]);
+    mUpperVec[0] /= 2;
+    qDebug() << "upper" << mUpper.toHsv();
 }
 
 Mat BallTrackingThread::GetThresholdedImage(Mat img) const
@@ -41,19 +50,8 @@ Mat BallTrackingThread::GetThresholdedImage(Mat img) const
     Mat imgHSV;
     cvtColor(img, imgHSV, CV_BGR2HSV);
     Mat threshed;
-    Vec3f lower;
-    // BGR
-    lower[0] = mErosionIterations;
-    lower[1] = 30;
-    lower[2] = 80;
 
-    Vec3f upper;
-    // BGR
-    upper[0] = mDilutionIterations;
-    upper[1] = 255;
-    upper[2] = 255;
-
-    inRange(imgHSV, lower, upper, threshed);
+    inRange(imgHSV, mLowerVec, mUpperVec, threshed);
     return threshed;
 }
 

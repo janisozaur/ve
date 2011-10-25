@@ -32,6 +32,8 @@ private:
     cv::Mat GetThresholdedImage(cv::Mat img) const;
     QColor mLower;
     QColor mUpper;
+    cv::Vec3i mLowerVec;
+    cv::Vec3i mUpperVec;
     
 signals:
     void showImage();
