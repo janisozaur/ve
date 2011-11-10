@@ -34,6 +34,8 @@ private:
     QColor mUpper;
     cv::Vec3i mLowerVec;
     cv::Vec3i mUpperVec;
+    int mHue;
+    int mRadius;
     
 signals:
     void showImage();

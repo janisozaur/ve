@@ -9,7 +9,8 @@ using namespace cv;
 
 BallTrackingThread::BallTrackingThread(QObject *parent) :
     QThread(parent), mDilutionIterations(0), mErosionIterations(0), mRunning(true),
-    mLower(QColor::fromHsv(180, 30, 80)), mUpper(QColor::fromHsv(270, 255, 255))
+    mLower(QColor::fromHsv(200, 50, 80)), mUpper(QColor::fromHsv(220, 255, 255)),
+    mHue(95), mRadius(10)
 {
     if (!mCapture.open(0)) {
         this->mRunning = false;
@@ -48,11 +49,72 @@ void BallTrackingThread::setUpperBound(const QColor &color)
 Mat BallTrackingThread::GetThresholdedImage(Mat img) const
 {
     // Convert the image into an HSV image
-    Mat imgHSV;
-    cvtColor(img, imgHSV, CV_BGR2HSV);
+    Mat frame;
+    cvtColor(img, frame, CV_BGR2HSV);
     Mat threshed;
 
-    inRange(imgHSV, mLowerVec, mUpperVec, threshed);
+    if (mHue - mRadius < 0) {
+        qDebug() << "a";
+        Mat threshed1;
+        Mat threshed2;
+#pragma omp parallel
+        {
+            #pragma omp sections
+            {
+                #pragma omp section
+                {
+                    cv::Vec3i lowerVec;
+                    cv::Vec3i upperVec;
+                    lowerVec = cv::Vec3i(0, 50, 80);
+                    upperVec = cv::Vec3i(mHue + mRadius, 255, 255);
+                    inRange(frame, lowerVec, upperVec, threshed1);
+                }
+                #pragma omp section
+                {
+                    cv::Vec3i lowerVec;
+                    cv::Vec3i upperVec;
+                    lowerVec = cv::Vec3i(mHue + 180 - mRadius, 50, 80);
+                    upperVec = cv::Vec3i(180, 255, 255);
+                    inRange(frame, lowerVec, upperVec, threshed2);
+                }
+            }
+        }
+        cv::bitwise_or(threshed1, threshed2, threshed);
+    } else if (mHue + mRadius > 180) {
+        qDebug() << "b";
+        Mat threshed1;
+        Mat threshed2;
+#pragma omp parallel
+        {
+            #pragma omp sections
+            {
+                #pragma omp section
+                {
+                    cv::Vec3i lowerVec;
+                    cv::Vec3i upperVec;
+                    lowerVec = cv::Vec3i(mHue - mRadius, 50, 80);
+                    upperVec = cv::Vec3i(180, 255, 255);
+                    inRange(frame, lowerVec, upperVec, threshed1);
+                }
+                #pragma omp section
+                {
+                    cv::Vec3i lowerVec;
+                    cv::Vec3i upperVec;
+                    lowerVec = cv::Vec3i(0, 50, 80);
+                    upperVec = cv::Vec3i(mHue + mRadius - 180, 255, 255);
+                    inRange(frame, lowerVec, upperVec, threshed2);
+                }
+            }
+        }
+        cv::bitwise_or(threshed1, threshed2, threshed);
+    } else {
+        qDebug() << "c";
+        cv::Vec3i lowerVec;
+        cv::Vec3i upperVec;
+        lowerVec = cv::Vec3i(mHue - mRadius, 50, 80);
+        upperVec = cv::Vec3i(mHue + mRadius, 255, 255);
+        inRange(frame, lowerVec, upperVec, threshed);
+    }
     return threshed;
 }
 

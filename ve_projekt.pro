@@ -9,9 +9,9 @@ QT       += core gui
 TARGET = ve_projekt
 TEMPLATE = app
 
-LIBS += `pkg-config opencv --libs`
+LIBS += `pkg-config opencv --libs` -lgomp
 
-QMAKE_CXXFLAGS += -std=gnu++0x
+QMAKE_CXXFLAGS += -std=gnu++0x -fopenmp
 QMAKE_CXXFLAGS += `pkg-config opencv --cflags`
 
 INCLUDEPATH += `pkg-config opencv --cflags-only-I` /usr/include/opencv
