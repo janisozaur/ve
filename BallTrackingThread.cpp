@@ -1,6 +1,7 @@
 #include <vector>
 #include <QCoreApplication>
 #include <QDebug>
+#include <limits>
 
 #include "BallTrackingThread.h"
 
@@ -104,4 +105,57 @@ void BallTrackingThread::setErosionIterations(int iterations)
 {
     mErosionIterations = iterations;
     qDebug() << "changed erosion: " <<  mErosionIterations;
+}
+
+int BallTrackingThread::scanEmptyHue(const int &radius) const
+{
+    Mat frame = map["mywindow"];
+    cvtColor(frame, frame, CV_BGR2HSV);
+    QVector<int> values(180);
+    int *ptr = values.data();
+#pragma omp parallel for
+    for (int i = 0; i < 180; i++) {
+        Mat threshed;
+        cv::Vec3i lowerVec;
+        cv::Vec3i upperVec;
+        int sum = 0;
+        if (i - radius < 0) {
+            lowerVec = cv::Vec3i(0, 50, 80);
+            upperVec = cv::Vec3i(i + radius, 255, 255);
+            inRange(frame, lowerVec, upperVec, threshed);
+            sum += countNonZero(threshed);
+            lowerVec = cv::Vec3i(i + 180 - radius, 50, 80);
+            upperVec = cv::Vec3i(180, 255, 255);
+            inRange(frame, lowerVec, upperVec, threshed);
+            sum += countNonZero(threshed);
+        } else if (i + radius > 180) {
+            lowerVec = cv::Vec3i(i - radius, 50, 80);
+            upperVec = cv::Vec3i(180, 255, 255);
+            inRange(frame, lowerVec, upperVec, threshed);
+            sum += countNonZero(threshed);
+            lowerVec = cv::Vec3i(0, 50, 80);
+            upperVec = cv::Vec3i(i + radius - 180, 255, 255);
+            inRange(frame, lowerVec, upperVec, threshed);
+            sum += countNonZero(threshed);
+        } else {
+            lowerVec = cv::Vec3i(i - radius, 50, 80);
+            upperVec = cv::Vec3i(i + radius, 255, 255);
+            inRange(frame, lowerVec, upperVec, threshed);
+            sum += countNonZero(threshed);
+        }
+        ptr[i] = sum;
+    }
+    int min = std::numeric_limits<int>::max();
+    int idx = -1;
+    for (int i = 0; i < values.size(); i++) {
+        if (values.at(i) < min && i != 90) {
+            idx = i;
+            min = values.at(i);
+        }
+    }
+    qDebug() << values;
+    qDebug() << "the lowest value was at index" << idx << ", it was" << min;
+    qDebug() << values.mid(5, 10);
+    qDebug() << values.mid(85, 10);
+    return idx;
 }

@@ -39,6 +39,7 @@ signals:
     void showImage();
 
 public slots:
+    int scanEmptyHue(const int &spread) const;
 };
 
 #endif // BALLTRACKINGTHREAD_H
