@@ -11,6 +11,7 @@ TEMPLATE = app
 
 LIBS += `pkg-config opencv --libs`
 
+QMAKE_CXXFLAGS += -std=gnu++0x
 QMAKE_CXXFLAGS += `pkg-config opencv --cflags`
 
 INCLUDEPATH += `pkg-config opencv --cflags-only-I` /usr/include/opencv
