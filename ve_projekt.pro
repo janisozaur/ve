@@ -19,15 +19,15 @@ INCLUDEPATH += `pkg-config opencv --cflags-only-I` /usr/include/opencv
 SOURCES += main.cpp\
         MainWindow.cpp \
     BallTrackingThread.cpp \
-    movethread.cpp \
-    PSMoveForm.cpp
+    PSMoveForm.cpp \
+    MoveThread.cpp
 
 HEADERS  += MainWindow.h \
     BallTrackingThread.h \
-    movethread.h \
     PSMoveForm.h \
     MoveButtons.h \
-    MoveData.h
+    MoveData.h \
+    MoveThread.h
 
 FORMS    += MainWindow.ui \
     PSMoveForm.ui

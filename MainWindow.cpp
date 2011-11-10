@@ -1,7 +1,7 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 #include "BallTrackingThread.h"
-#include "movethread.h"
+#include "MoveThread.h"
 #include "PSMoveForm.h"
 #include "MoveButtons.h"
 

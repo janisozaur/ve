@@ -1,4 +1,4 @@
-#include "movethread.h"
+#include "MoveThread.h"
 #include "PSMoveForm.h"
 #include "MainWindow.h"
 
