@@ -18,8 +18,8 @@ public:
     QMap<QString, cv::Mat> map;
     QColor getLowerBound() const;
     QColor getUpperBound() const;
-    void setLowerBound(const QColor color);
-    void setUpperBound(const QColor color);
+    void setLowerBound(const QColor &color);
+    void setUpperBound(const QColor &color);
 
 protected:
     void run();

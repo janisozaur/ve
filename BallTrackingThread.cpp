@@ -28,7 +28,7 @@ QColor BallTrackingThread::getUpperBound() const
     return mUpper;
 }
 
-void BallTrackingThread::setLowerBound(const QColor color)
+void BallTrackingThread::setLowerBound(const QColor &color)
 {
     mLower = color;
     mLower.getHsv(&mLowerVec[0], &mLowerVec[1], &mLowerVec[2]);
@@ -36,7 +36,7 @@ void BallTrackingThread::setLowerBound(const QColor color)
     qDebug() << "lower" << mLower.toHsv();
 }
 
-void BallTrackingThread::setUpperBound(const QColor color)
+void BallTrackingThread::setUpperBound(const QColor &color)
 {
     mUpper = color;
     mUpper.getHsv(&mUpperVec[0], &mUpperVec[1], &mUpperVec[2]);
