@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="ps_logo">res/Playstation_logo_bw.svg</file>
+        <file alias="move_logo">res/PlayStation_Move_Logo.svg</file>
+    </qresource>
+</RCC>
