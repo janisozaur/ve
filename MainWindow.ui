@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>300</height>
+    <height>309</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -66,6 +66,22 @@
         </property>
        </widget>
       </item>
+      <item row="3" column="0" colspan="2">
+       <widget class="QGroupBox" name="openCVGroupBox">
+        <property name="title">
+         <string>OpenCV</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <item>
+          <widget class="QPushButton" name="scanPushButton">
+           <property name="text">
+            <string>Scan for zero</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
       <item row="2" column="0" colspan="2">
        <widget class="QPushButton" name="pushButton">
         <property name="text">
@@ -92,6 +108,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="moveConnectPushButton">
+        <property name="text">
+         <string>connect to move</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="verticalSpacer">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
@@ -106,6 +129,16 @@
       </item>
      </layout>
     </item>
+    <item>
+     <widget class="QFrame" name="moveFrame">
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -114,7 +147,7 @@
      <x>0</x>
      <y>0</y>
      <width>400</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>

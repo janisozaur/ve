@@ -5,7 +5,8 @@
 #include <cv.h>
 
 class BallTrackingThread;
-
+class MoveThread;
+class PSMoveForm;
 
 namespace Ui {
 	class MainWindow;
@@ -33,9 +34,15 @@ private slots:
 
     void on_dilutionSlider_valueChanged(int value);
 
+    void on_moveConnectPushButton_clicked();
+
+    void on_scanPushButton_clicked();
+
 private:
 	Ui::MainWindow *ui;
     BallTrackingThread *mBallTracker;
+    MoveThread *mMoveThread;
+    PSMoveForm *mMoveForm;
 };
 
 #endif // MAINWINDOW_H

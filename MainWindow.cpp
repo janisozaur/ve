@@ -1,24 +1,27 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
+#include "BallTrackingThread.h"
+#include "movethread.h"
+#include "PSMoveForm.h"
+#include "MoveButtons.h"
 
 #include <highgui.h>
 #include <QColorDialog>
 
 #include <QDebug>
 
-#include "BallTrackingThread.h"
 
 using namespace cv;
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
     ui(new Ui::MainWindow),
-    mBallTracker(NULL)
+    mBallTracker(nullptr), mMoveThread(nullptr), mMoveForm(nullptr)
 {
 	ui->setupUi(this);
+    qRegisterMetaType<MoveButtons>("MoveButtons");
     cv::namedWindow( "mywindow", CV_WINDOW_AUTOSIZE );
     cv::namedWindow( "thresh", CV_WINDOW_AUTOSIZE );
-    qRegisterMetaType<Mat>("Mat");
 }
 
 MainWindow::~MainWindow()
@@ -49,7 +52,9 @@ void MainWindow::on_setLowerPushButton_clicked()
         return;
     }
     QColor c = QColorDialog::getColor(mBallTracker->getLowerBound());
-    mBallTracker->setLowerBound(c);
+    if (c.isValid()) {
+        mBallTracker->setLowerBound(c);
+    }
 }
 
 void MainWindow::on_setUpperPushButton_clicked()
@@ -58,7 +63,9 @@ void MainWindow::on_setUpperPushButton_clicked()
         return;
     }
     QColor c = QColorDialog::getColor(mBallTracker->getUpperBound());
-    mBallTracker->setUpperBound(c);
+    if (c.isValid()) {
+        mBallTracker->setUpperBound(c);
+    }
 }
 
 void MainWindow::on_erosionSlider_valueChanged(int value)
@@ -73,4 +80,28 @@ void MainWindow::on_dilutionSlider_valueChanged(int value)
     if (mBallTracker != NULL) {
         mBallTracker->setDilutionIterations(value);
     }
+}
+
+void MainWindow::on_moveConnectPushButton_clicked()
+{
+    mMoveForm = new PSMoveForm();
+    mMoveForm->show();
+    mMoveThread = new MoveThread(this);
+    connect(mMoveThread, SIGNAL(dataReceived(MoveData)), mMoveForm, SLOT(parseMoveData(MoveData)));
+    connect(mMoveForm, SIGNAL(setRgb(QColor)), mMoveThread, SLOT(setRGB(QColor)));
+    connect(mMoveForm, SIGNAL(setRumble(quint8)), mMoveThread, SLOT(setRumble(quint8)));
+    mMoveThread->start();
+}
+
+void MainWindow::on_scanPushButton_clicked()
+{
+    if (mBallTracker == NULL) {
+        return;
+    }
+    int radius = 10;
+    int emptyHue = mBallTracker->scanEmptyHue(radius);
+    const QColor lower = QColor::fromHsv(emptyHue - radius, 50, 80);
+    const QColor upper = QColor::fromHsv(emptyHue + radius, 255, 255);
+    mBallTracker->setLowerBound(lower);
+    mBallTracker->setUpperBound(upper);
 }
