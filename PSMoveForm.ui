@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>372</width>
-    <height>358</height>
+    <height>517</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -229,8 +229,8 @@ T</string>
   <widget class="QDial" name="redDial">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>280</y>
+     <x>20</x>
+     <y>430</y>
      <width>50</width>
      <height>64</height>
     </rect>
@@ -243,7 +243,7 @@ T</string>
    <property name="geometry">
     <rect>
      <x>160</x>
-     <y>280</y>
+     <y>430</y>
      <width>50</width>
      <height>64</height>
     </rect>
@@ -255,8 +255,8 @@ T</string>
   <widget class="QDial" name="blueDial">
    <property name="geometry">
     <rect>
-     <x>290</x>
-     <y>280</y>
+     <x>300</x>
+     <y>430</y>
      <width>50</width>
      <height>64</height>
     </rect>
@@ -264,6 +264,168 @@ T</string>
    <property name="maximum">
     <number>255</number>
    </property>
+  </widget>
+  <widget class="QGroupBox" name="accGroupBox">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>280</y>
+     <width>161</width>
+     <height>114</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Accelerometer</string>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <layout class="QFormLayout" name="formLayout">
+    <item row="1" column="1">
+     <widget class="QProgressBar" name="accXProgressBar">
+      <property name="minimum">
+       <number>-32768</number>
+      </property>
+      <property name="maximum">
+       <number>32767</number>
+      </property>
+      <property name="value">
+       <number>24</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QProgressBar" name="accYProgressBar">
+      <property name="minimum">
+       <number>-32768</number>
+      </property>
+      <property name="maximum">
+       <number>32767</number>
+      </property>
+      <property name="value">
+       <number>24</number>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="1">
+     <widget class="QProgressBar" name="accZProgressBar">
+      <property name="minimum">
+       <number>-32768</number>
+      </property>
+      <property name="maximum">
+       <number>32767</number>
+      </property>
+      <property name="value">
+       <number>24</number>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="label_3">
+      <property name="text">
+       <string>X</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QLabel" name="label_4">
+      <property name="text">
+       <string>Y</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QLabel" name="label_5">
+      <property name="text">
+       <string>Z</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QGroupBox" name="gyroGroupBox">
+   <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>280</y>
+     <width>161</width>
+     <height>114</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Gyro</string>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <layout class="QFormLayout" name="formLayout_2">
+    <item row="1" column="1">
+     <widget class="QProgressBar" name="gyroXProgressBar">
+      <property name="minimum">
+       <number>-32768</number>
+      </property>
+      <property name="maximum">
+       <number>32767</number>
+      </property>
+      <property name="value">
+       <number>24</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QProgressBar" name="gyroYProgressBar">
+      <property name="minimum">
+       <number>-32768</number>
+      </property>
+      <property name="maximum">
+       <number>32767</number>
+      </property>
+      <property name="value">
+       <number>24</number>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="1">
+     <widget class="QProgressBar" name="gyroZProgressBar">
+      <property name="minimum">
+       <number>-32768</number>
+      </property>
+      <property name="maximum">
+       <number>32767</number>
+      </property>
+      <property name="value">
+       <number>24</number>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="label_6">
+      <property name="text">
+       <string>X</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QLabel" name="label_7">
+      <property name="text">
+       <string>Y</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QLabel" name="label_8">
+      <property name="text">
+       <string>Z</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
  </widget>
  <resources>

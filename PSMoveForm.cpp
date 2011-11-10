@@ -66,14 +66,24 @@ void PSMoveForm::parseMoveData(MoveData d)
         mBatteryLayout->setCurrentIndex(1);
     }
     emit setRumble(d.buttons.trigger);
-    const QVector3D acc = d.accelerometer.normalized() * 128 + QVector3D(128, 128, 128);
+    /*const QVector3D acc = d.accelerometer.normalized() * 128 + QVector3D(128, 128, 128);
     const QColor rgb(acc.x(), acc.y(), acc.z());
     static int w = 0;
     if (w++ == 10) {
         w = 0;
         emit setRgb(rgb);
+    }*/
+    if (ui->accGroupBox->isChecked()) {
+        ui->accXProgressBar->setValue(d.accelerometer.x());
+        ui->accYProgressBar->setValue(d.accelerometer.y());
+        ui->accZProgressBar->setValue(d.accelerometer.z());
     }
-    //ui->batteryProgressBar->setValue(d.battery);
+
+    if (ui->gyroGroupBox->isChecked()) {
+        ui->gyroXProgressBar->setValue(d.gyro.x());
+        ui->gyroYProgressBar->setValue(d.gyro.y());
+        ui->gyroZProgressBar->setValue(d.gyro.z());
+    }
 }
 
 void PSMoveForm::on_redDial_valueChanged(int value)
