@@ -7,4 +7,10 @@
         <file alias="pooltable.3ds">res/models/pooltable_materialed.3ds</file>
         <file alias="pooltable_physics.3ds">res/models/pool_final_physics_mine.3ds</file>
     </qresource>
+    <qresource prefix="/textures">
+        <file alias="dot.jpg">res/textures/dot.jpg</file>
+        <file alias="green.jpg">res/textures/green.jpg</file>
+        <file alias="wood1.jpg">res/textures/wood1.jpg</file>
+        <file alias="wood2.jpg">res/textures/wood2.jpg</file>
+    </qresource>
 </RCC>
