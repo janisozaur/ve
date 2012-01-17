@@ -55,7 +55,7 @@ Mat BallTrackingThread::GetThresholdedImage(Mat img) const
     Mat threshed;
 
     if (mHue - mRadius < 0) {
-        qDebug() << "a";
+        //qDebug() << "a";
         Mat threshed1;
         Mat threshed2;
 #pragma omp parallel
@@ -82,7 +82,7 @@ Mat BallTrackingThread::GetThresholdedImage(Mat img) const
         }
         cv::bitwise_or(threshed1, threshed2, threshed);
     } else if (mHue + mRadius > 180) {
-        qDebug() << "b";
+        //qDebug() << "b";
         Mat threshed1;
         Mat threshed2;
 #pragma omp parallel
@@ -109,7 +109,7 @@ Mat BallTrackingThread::GetThresholdedImage(Mat img) const
         }
         cv::bitwise_or(threshed1, threshed2, threshed);
     } else {
-        qDebug() << "c";
+        //qDebug() << "c";
         cv::Vec3i lowerVec;
         cv::Vec3i upperVec;
         lowerVec = cv::Vec3i(mHue - mRadius, 50, 80);
@@ -136,8 +136,8 @@ void BallTrackingThread::run()
         erode(threshed, threshed, Mat(), Point(-1, -1), mDilutionIterations);
         dilate(threshed, threshed, Mat(), Point(-1, -1), mErosionIterations);
 
-        GaussianBlur(threshed, threshed, Size(7,7), 1.5, 1.5);
-        HoughCircles(threshed, storage, CV_HOUGH_GRADIENT, 2, threshed.cols, 200, 100);
+        GaussianBlur(threshed, threshed, Size(9,9), 2, 2);
+        HoughCircles(threshed, storage, CV_HOUGH_GRADIENT, 2, threshed.cols, 150, 50);
         //qDebug() << "size" << storage.size();
         for (size_t i = 0; i < storage.size(); i++) {
             //qDebug() << "circle:" << storage[i][0] << ", " << storage[i][1] << ", " << storage[i][2];
@@ -148,6 +148,7 @@ void BallTrackingThread::run()
         //cvtColor(frame, frame, CV_RGB2HSV);
         map["mywindow"] = frame;
         map["thresh"] = threshed;
+        //qDebug() << "non zero:" << countNonZero(threshed);
         showImage();
         QCoreApplication::processEvents();
     }
