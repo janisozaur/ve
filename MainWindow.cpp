@@ -5,7 +5,7 @@
 #include "PSMoveForm.h"
 #include "MoveButtons.h"
 
-#include <highgui.h>
+#include <highgui/highgui.hpp>
 #include <QColorDialog>
 
 #include <QDebug>

@@ -9,12 +9,12 @@ QT       += core gui
 TARGET = ve_projekt
 TEMPLATE = app
 
-LIBS += `pkg-config opencv --libs` -lbluetooth -lgomp
+LIBS += -lbluetooth -lgomp -lGLU -lglut -l3ds
+PKGCONFIG += bullet opencv
 
 QMAKE_CXXFLAGS += -std=gnu++0x -fopenmp
-QMAKE_CXXFLAGS += `pkg-config opencv --cflags`
 
-INCLUDEPATH += `pkg-config opencv --cflags-only-I` /usr/include/opencv
+INCLUDEPATH += /usr/include/opencv2 /usr/local/include/bullet/
 
 SOURCES += main.cpp\
         MainWindow.cpp \

@@ -2,6 +2,7 @@
 #include <QCoreApplication>
 #include <QDebug>
 #include <limits>
+#include <imgproc/imgproc.hpp>
 
 #include "BallTrackingThread.h"
 

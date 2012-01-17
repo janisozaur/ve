@@ -2,8 +2,8 @@
 #define BALLTRACKINGTHREAD_H
 
 #include <QThread>
-#include <cv.h>
-#include <highgui.h>
+#include <core/core.hpp>
+#include <highgui/highgui.hpp>
 #include <QMap>
 #include <QColor>
 
