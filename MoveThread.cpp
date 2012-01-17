@@ -8,12 +8,17 @@
 #include <QFile>
 #include <QSocketNotifier>
 #include <QTimer>
+#include <QMatrix4x4>
 
 #include <QDebug>
 
 MoveThread::MoveThread(QObject *parent) :
     QThread(parent), mMoveControllerDev(nullptr), mMoveCsk(0), mMoveIsk(0),
-    mMoveForm(nullptr), mRumble(0)
+    mMoveForm(nullptr), mRumble(0), mPrevMovePressed(false)
+{
+}
+
+MoveThread::~MoveThread()
 {
 }
 
@@ -39,7 +44,7 @@ void MoveThread::run()
     MainWindow *mw = dynamic_cast<MainWindow *>(this->parent());
     //mMoveForm = new PSMoveForm(mw);
     QTimer *timer = new QTimer(this);
-    timer->setInterval(200);
+    timer->setInterval(300);
     connect(timer, SIGNAL(timeout()), this, SLOT(moveWriteData()));
     timer->start();
     this->exec();
@@ -345,14 +350,16 @@ void MoveThread::readReport(int fd)
             if (tmp.at(4) & 0x01) {
                 b.buttonsPressed.append(MoveButtons::PS);
             }
+            bool movePressed = false;
             if (tmp.at(4) & 0x08) {
+                movePressed = true;
                 b.buttonsPressed.append(MoveButtons::Move);
             }
             b.trigger = quint8(tmp.at(7));
 
-            const qint16 ax = tmp.at(20) + tmp.at(21)*256 - 32768;
-            const qint16 ay = tmp.at(22) + tmp.at(23)*256 - 32768;
-            const qint16 az = tmp.at(24) + tmp.at(25)*256 - 32768;
+            const qint16 ax =  tmp.at(20) + tmp.at(21)*256 - 32768;
+            const qint16 az = -tmp.at(22) + tmp.at(23)*256 - 32768;
+            const qint16 ay =  tmp.at(24) + tmp.at(25)*256 - 32768;
             const QVector3D acc(ax, ay, az);
 
             const qint16 gx = tmp.at(32) + tmp.at(33)*256 - 32768;
@@ -360,10 +367,53 @@ void MoveThread::readReport(int fd)
             const qint16 gz = tmp.at(36) + tmp.at(37)*256 - 32768;
             const QVector3D gyro(gx, gy, gz);
 
-            const qint16 mx = (tmp.at(39)<<12) | (tmp.at(40)<<4);
-            const qint16 my = (tmp.at(41)<<8)  | (tmp.at(42)&0xf0);
-            const qint16 mz = (tmp.at(42)<<12) | (tmp.at(43)<<4);
-            const QVector3D mag(mx, -my, mz);
+            const qint16 mx = ((tmp.at(39)<<12) | (tmp.at(40)<<4)) << 4;
+            const qint16 mz = ((tmp.at(41)<<8)  | (tmp.at(42)&0xf0)) << 4;
+            const qint16 my = ((tmp.at(42)<<12) | (tmp.at(43)<<4)) << 4;
+            const QVector3D mag(mx, my, -mz);
+
+            /*if (ax > mMaxAcc.x()) {
+                mMaxAcc.setX(ax);
+            }
+            if (ay > mMaxAcc.y()) {
+                mMaxAcc.setY(ay);
+            }
+            if (az > mMaxAcc.z()) {
+                mMaxAcc.setZ(az);
+            }
+            if (mx > mMaxMag.x()) {
+                mMaxMag.setX(mx);
+            }
+            if (my > mMaxMag.y()) {
+                mMaxMag.setY(my);
+            }
+            if (mz > mMaxMag.z()) {
+                mMaxMag.setZ(mz);
+            }
+
+            if (ax < mMinAcc.x()) {
+                mMinAcc.setX(ax);
+            }
+            if (ay < mMinAcc.y()) {
+                mMinAcc.setY(ay);
+            }
+            if (az < mMinAcc.z()) {
+                mMinAcc.setZ(az);
+            }
+            if (mx < mMinMag.x()) {
+                mMinMag.setX(mx);
+            }
+            if (my < mMinMag.y()) {
+                mMinMag.setY(my);
+            }
+            if (mz < mMinMag.z()) {
+                mMinMag.setZ(mz);
+            }*/
+            if (movePressed && !mPrevMovePressed) {
+                qDebug() << "acc max:" << mMaxAcc << "min:" << mMinAcc;
+                qDebug() << "mag max:" << mMaxMag << "min:" << mMinMag;
+            }
+            mPrevMovePressed = movePressed;
 
             MoveData d;
             d.buttons = b;

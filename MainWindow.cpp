@@ -4,6 +4,8 @@
 #include "MoveThread.h"
 #include "PSMoveForm.h"
 #include "MoveButtons.h"
+#include "GLForm.h"
+#include "Displayer.h"
 
 #include <highgui/highgui.hpp>
 #include <QColorDialog>
@@ -20,8 +22,13 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 	ui->setupUi(this);
     qRegisterMetaType<MoveButtons>("MoveButtons");
-    cv::namedWindow( "mywindow", CV_WINDOW_AUTOSIZE );
-    cv::namedWindow( "thresh", CV_WINDOW_AUTOSIZE );
+    //cv::namedWindow( "mywindow", CV_WINDOW_AUTOSIZE );
+    //cv::namedWindow( "thresh", CV_WINDOW_AUTOSIZE );
+
+    mGLForm = new GLForm();
+    mGLForm->show();
+	mDisplayer = new Displayer();
+	mDisplayer->show();
 }
 
 MainWindow::~MainWindow()
@@ -86,6 +93,8 @@ void MainWindow::on_moveConnectPushButton_clicked()
 {
     mMoveForm = new PSMoveForm();
     mMoveForm->show();
+    connect(mMoveForm, SIGNAL(setVector(QVector3D)), mGLForm, SLOT(setVector(QVector3D)));
+    connect(mMoveForm, SIGNAL(setMatrix(QMatrix4x4)), mGLForm, SLOT(setMatrix(QMatrix4x4)));
     mMoveThread = new MoveThread(this);
     connect(mMoveThread, SIGNAL(dataReceived(MoveData)), mMoveForm, SLOT(parseMoveData(MoveData)));
     connect(mMoveForm, SIGNAL(setRgb(QColor)), mMoveThread, SLOT(setRGB(QColor)));

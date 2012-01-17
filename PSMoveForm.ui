@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>372</width>
-    <height>517</height>
+    <height>700</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -230,7 +230,7 @@ T</string>
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>430</y>
+     <y>630</y>
      <width>50</width>
      <height>64</height>
     </rect>
@@ -243,7 +243,7 @@ T</string>
    <property name="geometry">
     <rect>
      <x>160</x>
-     <y>430</y>
+     <y>630</y>
      <width>50</width>
      <height>64</height>
     </rect>
@@ -256,7 +256,7 @@ T</string>
    <property name="geometry">
     <rect>
      <x>300</x>
-     <y>430</y>
+     <y>630</y>
      <width>50</width>
      <height>64</height>
     </rect>
@@ -270,7 +270,7 @@ T</string>
     <rect>
      <x>20</x>
      <y>280</y>
-     <width>161</width>
+     <width>331</width>
      <height>114</height>
     </rect>
    </property>
@@ -349,9 +349,9 @@ T</string>
   <widget class="QGroupBox" name="gyroGroupBox">
    <property name="geometry">
     <rect>
-     <x>190</x>
-     <y>280</y>
-     <width>161</width>
+     <x>20</x>
+     <y>520</y>
+     <width>331</width>
      <height>114</height>
     </rect>
    </property>
@@ -420,6 +420,87 @@ T</string>
     </item>
     <item row="3" column="0">
      <widget class="QLabel" name="label_8">
+      <property name="text">
+       <string>Z</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QGroupBox" name="magGroupBox">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>400</y>
+     <width>331</width>
+     <height>114</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Magnetometer</string>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <layout class="QFormLayout" name="formLayout_3">
+    <item row="1" column="1">
+     <widget class="QProgressBar" name="magXProgressBar">
+      <property name="minimum">
+       <number>-32768</number>
+      </property>
+      <property name="maximum">
+       <number>32767</number>
+      </property>
+      <property name="value">
+       <number>24</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QProgressBar" name="magYProgressBar">
+      <property name="minimum">
+       <number>-32768</number>
+      </property>
+      <property name="maximum">
+       <number>32767</number>
+      </property>
+      <property name="value">
+       <number>24</number>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="1">
+     <widget class="QProgressBar" name="magZProgressBar">
+      <property name="minimum">
+       <number>-32768</number>
+      </property>
+      <property name="maximum">
+       <number>32767</number>
+      </property>
+      <property name="value">
+       <number>24</number>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="label_9">
+      <property name="text">
+       <string>X</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QLabel" name="label_10">
+      <property name="text">
+       <string>Y</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QLabel" name="label_11">
       <property name="text">
        <string>Z</string>
       </property>

@@ -35,6 +35,7 @@ class MoveThread : public QThread
     Q_OBJECT
 public:
     explicit MoveThread(QObject *parent = 0);
+    ~MoveThread();
     
 private:
     int l2cap_listen(const bdaddr_t *bdaddr, unsigned short psm) const;
@@ -54,10 +55,13 @@ private:
     PSMoveForm *mMoveForm;
     QColor mRGB;
     quint8 mRumble;
+    bool mPrevMovePressed;
+    QVector3D mMaxAcc, mMinAcc, mMaxMag, mMinMag;
 
 signals:
     void setButtons(MoveButtons buttons);
     void dataReceived(MoveData d);
+    void setAxes(QVector3D one, QVector3D two, QVector3D three);
     
 public slots:
     void activated(int fd);

@@ -2,11 +2,12 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <cv.h>
 
 class BallTrackingThread;
 class MoveThread;
 class PSMoveForm;
+class GLForm;
+class Displayer;
 
 namespace Ui {
 	class MainWindow;
@@ -43,6 +44,8 @@ private:
     BallTrackingThread *mBallTracker;
     MoveThread *mMoveThread;
     PSMoveForm *mMoveForm;
+    GLForm *mGLForm;
+	Displayer *mDisplayer;
 };
 
 #endif // MAINWINDOW_H

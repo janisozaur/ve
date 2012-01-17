@@ -4,6 +4,7 @@
 #include "MoveData.h"
 
 #include <QWidget>
+#include <QMatrix4x4>
 
 namespace Ui {
     class PSMoveForm;
@@ -12,6 +13,7 @@ namespace Ui {
 class QCheckBox;
 class QLabel;
 class QStackedLayout;
+class IirFilter;
 
 class PSMoveForm : public QWidget
 {
@@ -28,6 +30,8 @@ public slots:
 signals:
     void setRgb(QColor rgb);
     void setRumble(quint8 rumble);
+    void setVector(QVector3D vec);
+    void setMatrix(QMatrix4x4 vec);
 
 private slots:
     void on_redDial_valueChanged(int value);
@@ -43,6 +47,10 @@ private:
     QStackedLayout *mBatteryLayout;
     QWidget *mBatteryPageWidgets;
     QColor mRGB;
+    QVector3D mOne, mTwo, mThree;
+    bool mPrevMovePressed;
+    IirFilter *mAccFilters[3];
+    IirFilter *mMagFilters[3];
 };
 
 #endif // PSMOVEFORM_H

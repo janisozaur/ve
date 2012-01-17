@@ -16,6 +16,8 @@ BallTrackingThread::BallTrackingThread(QObject *parent) :
     if (!mCapture.open(0)) {
         this->mRunning = false;
     }
+    mCapture.set(CV_CAP_PROP_FRAME_WIDTH, 1280);
+    mCapture.set(CV_CAP_PROP_FRAME_HEIGHT, 720);
     setLowerBound(mLower);
     setUpperBound(mUpper);
     qDebug() << "running:" << mRunning;

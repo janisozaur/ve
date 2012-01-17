@@ -1,15 +1,22 @@
 #include "PSMoveForm.h"
 #include "ui_PSMoveForm.h"
+#include "MadgwickAHRS.h"
+#include "IirFilter.h"
 
 #include <QStackedLayout>
 #include <QCheckBox>
 #include <QHBoxLayout>
+#include <cmath>
+#include <QQuaternion>
+#include <QMatrix4x4>
+#include <GL/freeglut.h>
 
 #include <QDebug>
 
 PSMoveForm::PSMoveForm(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::PSMoveForm)
+    ui(new Ui::PSMoveForm),
+    mPrevMovePressed(false)
 {
     ui->setupUi(this);
     mBatteryLayout = new QStackedLayout(ui->batteryContainerWidget);
@@ -30,10 +37,21 @@ PSMoveForm::PSMoveForm(QWidget *parent) :
     mBatteryPageWidgets[1].layout()->addWidget(mBatteryChargingLabel);
     mBatteryLayout->addWidget(&mBatteryPageWidgets[0]);
     mBatteryLayout->addWidget(&mBatteryPageWidgets[1]);
+
+    double k = 0.18;
+    double coeffs[2] = { 1, -(1-k) };
+    for (int i = 0; i < 3; i++) {
+        mAccFilters[i] = new IirFilter(&k, 1, coeffs, 2);
+        mMagFilters[i] = new IirFilter(&k, 1, coeffs, 2);
+    }
 }
 
 PSMoveForm::~PSMoveForm()
 {
+    for (int i = 0; i < 3; i++) {
+        delete mAccFilters[i];
+        delete mMagFilters[i];
+    }
     delete [] mBatteryCheckBoxes;
     delete ui;
 }
@@ -73,6 +91,32 @@ void PSMoveForm::parseMoveData(MoveData d)
         w = 0;
         emit setRgb(rgb);
     }*/
+
+    //QVector3D normalisedAcc = d.accelerometer / 32768;
+    //QVector3D normalisedMag = d.mag / 32768;
+    //normalisedAcc.normalize();
+    //normalisedMag = QVector3D::crossProduct(normalisedMag.normalized(), normalisedAcc).normalized();
+    //QVector3D north = QVector3D::crossProduct(normalisedMag, normalisedAcc).normalized();
+
+    bool movePressed = d.buttons.buttonsPressed.contains(MoveButtons::Move);
+    if (!mPrevMovePressed && movePressed) {
+
+        //mOne = normalisedAcc;
+        //mTwo = normalisedMag;
+        //mThree = north;
+
+        qDebug() << "acc:" << d.accelerometer;
+        qDebug() << "mag:" << d.mag;
+    }
+    mPrevMovePressed = movePressed;
+    /*float one = std::acos(QVector3D::dotProduct(normalisedAcc, mOne));
+    float two = std::acos(QVector3D::dotProduct(normalisedMag, mTwo));
+    float three = std::acos(QVector3D::dotProduct(north, mThree));*/
+    //qDebug() << QString::number(one, 'g', 4) << QString::number(two, 'g', 4) << QString::number(three, 'g', 4);
+    /*ui->accXProgressBar->setValue(one * 180 / M_PI);
+    ui->accYProgressBar->setValue(two * 180 / M_PI);
+    ui->accZProgressBar->setValue(three * 180 / M_PI);*/
+
     if (ui->accGroupBox->isChecked()) {
         ui->accXProgressBar->setValue(d.accelerometer.x());
         ui->accYProgressBar->setValue(d.accelerometer.y());
@@ -84,6 +128,52 @@ void PSMoveForm::parseMoveData(MoveData d)
         ui->gyroYProgressBar->setValue(d.gyro.y());
         ui->gyroZProgressBar->setValue(d.gyro.z());
     }
+
+    if (ui->magGroupBox->isChecked()) {
+        ui->magXProgressBar->setValue(d.mag.x());
+        ui->magYProgressBar->setValue(d.mag.y());
+        ui->magZProgressBar->setValue(d.mag.z());
+    }
+
+    QVector3D acc = d.accelerometer;
+    QVector3D mag = d.mag;
+    acc.normalize();
+    mag.normalize();
+    QMatrix4x4 m;
+    m.setRow(2, acc);
+    QVector3D east = QVector3D::crossProduct(acc, -mag);
+    m.setRow(0, east);
+    QVector3D north = QVector3D::crossProduct(acc, -mag);
+    m.setRow(1, north);
+    //qDebug() << mag;
+    /*QVector3D gyro = d.gyro / 32768;
+    acc.setX(mAccFilters[0]->step(acc.x()));
+    acc.setY(mAccFilters[1]->step(acc.y()));
+    acc.setZ(mAccFilters[2]->step(acc.z()));
+
+    mag.setX(mMagFilters[0]->step(mag.x()));
+    mag.setY(mMagFilters[1]->step(mag.y()));
+    mag.setZ(mMagFilters[2]->step(mag.z()));*/
+
+    //MadgwickAHRSupdate(gyro.x(), gyro.y(), gyro.z(), acc.x(), acc.y(), acc.z(), mag.x(), mag.y(), mag.z());
+
+    QVector3D newY = acc;
+    QVector3D newZ = mag;
+    newZ.setZ(-newZ.z());
+    QVector3D newX = QVector3D::crossProduct(newZ, newY).normalized();
+    QMatrix4x4 newMat;
+    newMat.setRow(0, newX);
+    newMat.setRow(1, newY);
+    newMat.setRow(2, newZ);
+    newMat.setRow(3, QVector4D(0, 0, 0, 1));
+    float qq1 = q0;
+    float qq2 = q1;
+    float qq3 = q2;
+    float qq4 = q3;
+    QQuaternion quat(qq1, qq2, qq3, qq4);
+    QVector3D vec(1, 1, 1);
+    emit setMatrix(newMat);
+    //emit setVector(quat.rotatedVector(vec));
 }
 
 void PSMoveForm::on_redDial_valueChanged(int value)

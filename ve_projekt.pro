@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui opengl
 
 TARGET = ve_projekt
 TEMPLATE = app
@@ -20,17 +20,37 @@ SOURCES += main.cpp\
         MainWindow.cpp \
     BallTrackingThread.cpp \
     PSMoveForm.cpp \
-    MoveThread.cpp
+    MoveThread.cpp \
+    IirFilter.cpp \
+    DisplayWidget.cpp \
+    GLForm.cpp \
+    MadgwickAHRS.cpp \
+    Displayer.cpp \
+    Model.cpp \
+    GLDebugDrawer.cpp \
+    GLDebugFont.cpp \
+    FPSCounter.cpp
 
 HEADERS  += MainWindow.h \
     BallTrackingThread.h \
     PSMoveForm.h \
     MoveButtons.h \
     MoveData.h \
-    MoveThread.h
+    MoveThread.h \
+    IirFilter.h \
+    DisplayWidget.h \
+    GLForm.h \
+    MadgwickAHRS.h \
+    Displayer.h \
+    Model.h \
+    TextureInfo.h \
+    GLDebugDrawer.h \
+    GLDebugFont.h \
+    FPSCounter.h
 
 FORMS    += MainWindow.ui \
-    PSMoveForm.ui
+    PSMoveForm.ui \
+    GLForm.ui
 
 RESOURCES += \
     resources.qrc
