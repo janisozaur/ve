@@ -16,10 +16,6 @@ DisplayWidget::DisplayWidget(QWidget *parent) :
 
 void DisplayWidget::initializeGL()
 {
-    QCoreApplication *app = QCoreApplication::instance();
-    int argc = 0;
-    char *argv = NULL;
-    glutInit(&argc, &argv);
     // Set up the rendering context, define display lists etc.:
     glShadeModel(GL_SMOOTH);
     glEnable(GL_LIGHTING);

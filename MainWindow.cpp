@@ -9,6 +9,7 @@
 
 #include <highgui/highgui.hpp>
 #include <QColorDialog>
+#include <GL/freeglut.h>
 
 #include <QDebug>
 
@@ -25,6 +26,9 @@ MainWindow::MainWindow(QWidget *parent) :
     //cv::namedWindow( "mywindow", CV_WINDOW_AUTOSIZE );
     //cv::namedWindow( "thresh", CV_WINDOW_AUTOSIZE );
 
+	int argc = 0;
+	char *argv = nullptr;
+	glutInit(&argc, &argv);
     mGLForm = new GLForm();
     mGLForm->show();
 	mDisplayer = new Displayer();
