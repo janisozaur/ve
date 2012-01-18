@@ -29,7 +29,8 @@ SOURCES += main.cpp\
     Model.cpp \
     GLDebugDrawer.cpp \
     GLDebugFont.cpp \
-    FPSCounter.cpp
+    FPSCounter.cpp \
+    StereoCamera.cpp
 
 HEADERS  += MainWindow.h \
     BallTrackingThread.h \
@@ -46,7 +47,8 @@ HEADERS  += MainWindow.h \
     TextureInfo.h \
     GLDebugDrawer.h \
     GLDebugFont.h \
-    FPSCounter.h
+    FPSCounter.h \
+    StereoCamera.h
 
 FORMS    += MainWindow.ui \
     PSMoveForm.ui \
