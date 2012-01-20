@@ -2,6 +2,7 @@
 #define DISPLAYER_H
 
 #include "FPSCounter.h"
+#include "StereoCamera.h"
 
 #include <QGLWidget>
 #ifdef Q_OS_LINUX
@@ -68,6 +69,7 @@ private:
 	GLDebugDrawer *mDebugDrawer;
 	FpsCounter mFpsCounter;
 	QMatrix4x4 mRotation;
+	StereoCamera mStereoCam;
 
 protected:
 	void initializeGL();

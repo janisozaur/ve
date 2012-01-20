@@ -5,6 +5,7 @@
 #include <QFile>
 #include <QTemporaryFile>
 #include <GL/glu.h>
+#include <GL/freeglut.h>
 
 #include <QDebug>
 
@@ -29,9 +30,15 @@ Displayer::Displayer(QWidget *parent) :
 			btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 100, 0)))),
 	mControllerMotionState(new btDefaultMotionState(
 			btTransform(btQuaternion(0, 0, 0, 1), btVector3(1.25f, 1, 0)))),
-	mQuadric(gluNewQuadric())
+	mQuadric(gluNewQuadric()),
+	mStereoCam(500.0f,     // Convergence
+			   35.0f,       // Eye Separation
+			   1.3333f,     // Aspect Ratio
+			   45.0f,       // FOV along Y in degrees
+			   10.0f,       // Near Clipping Distance
+			   2000.0f)   // Far Clipping Distance)
 {
-	mBackgroundColor.setGreen(255);
+	mBackgroundColor.setRgb(qRgb(100, 100, 100));
 	mPoolTableCollider = NULL;
 	mDynamicsWorld->setGravity(btVector3(0, -10, 0));
 	mDynamicsWorld->addRigidBody(mGroundRigidBody);
@@ -230,12 +237,42 @@ void Displayer::resizeGL(int w, int h)
 	qDebug() << "resize (" << w << ", " << h << ")";
 }
 
+void PlaceSceneElements()
+{
+	// translate to appropriate depth along -Z
+	glTranslatef(0.0f, 0.0f, -1800.0f);
+
+	// rotate the scene for viewing
+	glRotatef(-60.0f, 1.0f, 0.0f, 0.0f);
+	glRotatef(-45.0f, 0.0f, 0.0f, 1.0f);
+
+	// draw intersecting tori
+	glPushMatrix();
+		glTranslatef(0.0f, 0.0f, 240.0f);
+		glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+		glColor3f(0.2, 0.2, 0.6);
+		glutSolidTorus(40, 200, 20, 30);
+		glColor3f(0.7f, 0.7f, 0.7f);
+		glutWireTorus(40, 200, 20, 30);
+	glPopMatrix();
+
+	glPushMatrix();
+		glTranslatef(240.0f, 0.0f, 240.0f);
+		glColor3f(0.2, 0.2, 0.6);
+		glutSolidTorus(40, 200, 20, 30);
+		glColor3f(0.7f, 0.7f, 0.7f);
+		glutWireTorus(40, 200, 20, 30);
+	glPopMatrix();
+}
+
 void Displayer::paintGL()
 {
 	mFpsCounter.frameStart();
 	qglClearColor(mBackgroundColor);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
 	glMatrixMode(GL_MODELVIEW);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ACCUM_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 	glLoadIdentity();
 	btVector3 cam(0, 70, -30);
@@ -243,6 +280,29 @@ void Displayer::paintGL()
 	btVector3 cam2obj = target - cam;
 	//target += btVector3(-25, 0, 15);
 	//gluLookAt(0, 60, 80, 0, 26, 0, 0, 1, 0);
+
+	const float zdist = -400.0f;
+	mStereoCam.beginEye(StereoCamera::Left);
+	glColorMask(true, false, false, false);
+	//PlaceSceneElements();
+	glTranslatef(0.0f, 0.0f, zdist);
+	glRotatef(-(mPoolTableTrans.getRotation().getAngle() / SIMD_2_PI) * 180, 1, 0, 0);
+	mPoolTableDisplayModel->draw();
+	mStereoCam.finishEye();
+	glClear(GL_DEPTH_BUFFER_BIT);
+	mStereoCam.beginEye(StereoCamera::Right);
+	glColorMask(false, true, true, false);
+	//PlaceSceneElements();
+	glTranslatef(0.0f, 0.0f, zdist);
+	glRotatef(-(mPoolTableTrans.getRotation().getAngle() / SIMD_2_PI) * 180, 1, 0, 0);
+	mPoolTableDisplayModel->draw();
+	mStereoCam.finishEye();
+	glColorMask(true, true, true, true);
+	mDebugDrawer->setDebugMode(1);
+	mDynamicsWorld->debugDrawWorld();
+	mFpsCounter.frameEnd();
+	return;
+
 	gluLookAt(cam[0], cam[1], cam[2], target[0], target[1], target[2], 0, 1, 0);
 
 	glPushMatrix();
