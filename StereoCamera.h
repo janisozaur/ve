@@ -13,8 +13,13 @@ public:
 		float FarClippingDistance
 	);
 
-	void applyLeftFrustum() const;
-	void applyRightFrustum() const;
+	enum Eye {
+		Left,
+		Right
+	};
+
+	void beginEye(const Eye &e) const;
+	void finishEye() const;
 
 private:
 	float mConvergence;
@@ -23,6 +28,10 @@ private:
 	float mFOV;
 	float mNearClippingDistance;
 	float mFarClippingDistance;
+	float mTop;
+	float mBottom;
+	float mA;
+	float mES2;
 };
 
 #endif // STEREOCAMERA_H

@@ -3,58 +3,34 @@
 #include <cmath>
 #include <GL/gl.h>
 
-void StereoCamera::applyRightFrustum() const
+void StereoCamera::beginEye(const Eye &e) const
 {
-	float top, bottom, left, right;
+	float left, right;
 
-	top     = mNearClippingDistance * tan(mFOV/2);
-	bottom  = -top;
+	float b = mA - mES2;
+	float c = mA + mES2;
 
-	float a = mAspectRatio * tan(mFOV/2) * mConvergence;
-
-	float b = a - mEyeSeparation/2;
-	float c = a + mEyeSeparation/2;
-
-	left    =  -c * mNearClippingDistance/mConvergence;
-	right   =   b * mNearClippingDistance/mConvergence;
+	left    = -(e == Left ? b : c) * mNearClippingDistance/mConvergence;
+	right   =  (e == Left ? c : b) * mNearClippingDistance/mConvergence;
 
 	// Set the Projection Matrix
 	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glFrustum(left, right, bottom, top,
-			  mNearClippingDistance, mFarClippingDistance);
-
-	// Displace the world to left
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glTranslatef(-mEyeSeparation/2, 0.0f, 0.0f);
-}
-
-void StereoCamera::applyLeftFrustum() const
-{
-	float top, bottom, left, right;
-
-	top     = mNearClippingDistance * tan(mFOV/2);
-	bottom  = -top;
-
-	float a = mAspectRatio * tan(mFOV/2) * mConvergence;
-
-	float b = a - mEyeSeparation/2;
-	float c = a + mEyeSeparation/2;
-
-	left    = -b * mNearClippingDistance/mConvergence;
-	right   =  c * mNearClippingDistance/mConvergence;
-
-	// Set the Projection Matrix
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glFrustum(left, right, bottom, top,
+	glPushMatrix();
+	glFrustum(left, right, mBottom, mTop,
 			  mNearClippingDistance, mFarClippingDistance);
 
 	// Displace the world to right
 	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glTranslatef(mEyeSeparation/2, 0.0f, 0.0f);
+	glPushMatrix();
+	glTranslatef((e == Left ? mES2 : -mES2), 0.0f, 0.0f);
+}
+
+void StereoCamera::finishEye() const
+{
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	glPopMatrix();
 }
 
 StereoCamera::StereoCamera(
@@ -71,4 +47,9 @@ StereoCamera::StereoCamera(
 	mFOV                    = FOV * M_PI / 180.0f;
 	mNearClippingDistance   = NearClippingDistance;
 	mFarClippingDistance    = FarClippingDistance;
+	const float fovTan = tan(mFOV/2);
+	mTop = mNearClippingDistance * fovTan;
+	mBottom = -mTop;
+	mA = mAspectRatio * fovTan * mConvergence;
+	mES2 = mEyeSeparation/2;
 }
