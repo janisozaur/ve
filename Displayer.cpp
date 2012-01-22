@@ -310,6 +310,10 @@ void Displayer::paintGL()
 	mPoolTableDisplayModel->draw();
 	mStereoCam.finishEye();
 	glColorMask(true, true, true, true);
+	glMatrixMode(GL_PROJECTION);
+	gluPerspective(mStereoCam.fov(), mStereoCam.aspect(), mStereoCam.near(),
+				   mStereoCam.far());
+	glMatrixMode(GL_MODELVIEW);
 	mDebugDrawer->setDebugMode(1);
 	mDynamicsWorld->debugDrawWorld();
 	mFpsCounter.frameEnd();
