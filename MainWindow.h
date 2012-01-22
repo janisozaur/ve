@@ -2,12 +2,14 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QSemaphore>
 
 class BallTrackingThread;
 class MoveThread;
 class PSMoveForm;
 class GLForm;
 class Displayer;
+class WiiMarkerTracker;
 
 namespace Ui {
 	class MainWindow;
@@ -22,30 +24,36 @@ public:
 	~MainWindow();
 
 public slots:
-    void showImage();
+	void showImage();
 
 private slots:
-    void on_pushButton_clicked();
+	void on_pushButton_clicked();
 
-    void on_setLowerPushButton_clicked();
+	void on_setLowerPushButton_clicked();
 
-    void on_setUpperPushButton_clicked();
+	void on_setUpperPushButton_clicked();
 
-    void on_erosionSlider_valueChanged(int value);
+	void on_erosionSlider_valueChanged(int value);
 
-    void on_dilutionSlider_valueChanged(int value);
+	void on_dilutionSlider_valueChanged(int value);
 
-    void on_moveConnectPushButton_clicked();
+	void on_moveConnectPushButton_clicked();
 
-    void on_scanPushButton_clicked();
+	void on_scanPushButton_clicked();
+
+	void releaseWiiSemaphore();
+	void releaseMoveSemaphore();
 
 private:
 	Ui::MainWindow *ui;
-    BallTrackingThread *mBallTracker;
-    MoveThread *mMoveThread;
-    PSMoveForm *mMoveForm;
-    GLForm *mGLForm;
+	BallTrackingThread *mBallTracker;
+	MoveThread *mMoveThread;
+	PSMoveForm *mMoveForm;
+	WiiMarkerTracker *mWMT;
+	GLForm *mGLForm;
 	Displayer *mDisplayer;
+	QSemaphore mWiiSemaphore;
+	QSemaphore mMoveSemaphore;
 };
 
 #endif // MAINWINDOW_H
