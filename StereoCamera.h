@@ -20,6 +20,10 @@ public:
 
 	void beginEye(const Eye &e) const;
 	void finishEye() const;
+	float fov() const;
+	float aspect() const;
+	float near() const;
+	float far() const;
 
 private:
 	float mConvergence;

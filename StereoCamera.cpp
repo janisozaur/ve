@@ -53,3 +53,23 @@ StereoCamera::StereoCamera(
 	mA = mAspectRatio * fovTan * mConvergence;
 	mES2 = mEyeSeparation/2;
 }
+
+float StereoCamera::fov() const
+{
+	return mFOV * M_1_PI * 180.0f;
+}
+
+float StereoCamera::aspect() const
+{
+	return mAspectRatio;
+}
+
+float StereoCamera::near() const
+{
+	return mNearClippingDistance;
+}
+
+float StereoCamera::far() const
+{
+	return mFarClippingDistance;
+}
