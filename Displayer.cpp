@@ -32,8 +32,8 @@ Displayer::Displayer(QWidget *parent) :
 	mControllerMotionState(new btDefaultMotionState(
 			btTransform(btQuaternion(0, 0, 0, 1), btVector3(1.25f, 1, 0)))),
 	mQuadric(gluNewQuadric()),
-	mStereoCam(300.0f,     // Convergence
-			   35.0f,       // Eye Separation
+	mStereoCam(1500.0f,     // Convergence
+			   1.0f,       // Eye Separation
 			   1.3333f,     // Aspect Ratio
 			   45.0f,       // FOV along Y in degrees
 			   10.0f,       // Near Clipping Distance
@@ -272,9 +272,9 @@ void Displayer::paintGL()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ACCUM_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 	glLoadIdentity();
-	gluLookAt(0 + mCameraDiff.x(), 60 + mCameraDiff.y(), 0,
-			  0, 0, -500,
-			  0, 1, 0);
+	gluLookAt(0 + mCameraDiff.x(), 100 + mCameraDiff.y(), 0,
+			  0, 1, 0,
+			  0, 0, 1);
 	btVector3 cam(0, 70, -30);
 	btVector3 target = mPoolTableTrans.getOrigin();
 	btVector3 cam2obj = target - cam;
@@ -282,7 +282,7 @@ void Displayer::paintGL()
 	//gluLookAt(0, 60, 80, 0, 26, 0, 0, 1, 0);
 
 //	gluLookAt(cam[0], cam[1], cam[2], target[0], target[1], target[2], 0, 1, 0);
-	static float zdist = -200.0f;
+	static float zdist = 0.0f;
 //	static int delta = 1;
 //	if (zdist > 0 || zdist < -800) {
 //		delta = -delta;
