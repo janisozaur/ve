@@ -1,6 +1,7 @@
 #include "Model.h"
 #include "Displayer.h"
 #include "GLDebugDrawer.h"
+#include "StereoCamera.h"
 
 #include <QFile>
 #include <QTemporaryFile>
@@ -31,7 +32,7 @@ Displayer::Displayer(QWidget *parent) :
 	mControllerMotionState(new btDefaultMotionState(
 			btTransform(btQuaternion(0, 0, 0, 1), btVector3(1.25f, 1, 0)))),
 	mQuadric(gluNewQuadric()),
-	mStereoCam(500.0f,     // Convergence
+	mStereoCam(300.0f,     // Convergence
 			   35.0f,       // Eye Separation
 			   1.3333f,     // Aspect Ratio
 			   45.0f,       // FOV along Y in degrees
@@ -228,12 +229,7 @@ void Displayer::resizeGL(int w, int h)
 {
 	mWidth = w;
 	mHeight = h;
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
 	glViewport(0, 0, (GLint)w, (GLint)h);
-	gluPerspective(45.0f, (GLfloat)w / (GLfloat)h, 0.1f, 1000.0f);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
 	qDebug() << "resize (" << w << ", " << h << ")";
 }
 
@@ -271,22 +267,35 @@ void Displayer::paintGL()
 	qglClearColor(mBackgroundColor);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
+	//glTranslatef(0, -2, 0);
 	glMatrixMode(GL_MODELVIEW);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ACCUM_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 	glLoadIdentity();
+	gluLookAt(0 + mCameraDiff.x(), 60 + mCameraDiff.y(), 0,
+			  0, 0, -500,
+			  0, 1, 0);
 	btVector3 cam(0, 70, -30);
 	btVector3 target = mPoolTableTrans.getOrigin();
 	btVector3 cam2obj = target - cam;
 	//target += btVector3(-25, 0, 15);
 	//gluLookAt(0, 60, 80, 0, 26, 0, 0, 1, 0);
 
-	const float zdist = -400.0f;
+//	gluLookAt(cam[0], cam[1], cam[2], target[0], target[1], target[2], 0, 1, 0);
+	static float zdist = -200.0f;
+//	static int delta = 1;
+//	if (zdist > 0 || zdist < -800) {
+//		delta = -delta;
+//	}
+//	zdist += delta;
 	mStereoCam.beginEye(StereoCamera::Left);
 	glColorMask(true, false, false, false);
 	//PlaceSceneElements();
 	glTranslatef(0.0f, 0.0f, zdist);
-	glRotatef(-(mPoolTableTrans.getRotation().getAngle() / SIMD_2_PI) * 180, 1, 0, 0);
+	glRotatef(-(mPoolTableTrans.getRotation().getAngle() / SIMD_2_PI) * 360, 1, 0, 0);
+	glTranslatef(mPoolTableTrans.getOrigin().getX(),
+				 mPoolTableTrans.getOrigin().getY(),
+				 mPoolTableTrans.getOrigin().getZ());
 	mPoolTableDisplayModel->draw();
 	mStereoCam.finishEye();
 	glClear(GL_DEPTH_BUFFER_BIT);
@@ -294,42 +303,15 @@ void Displayer::paintGL()
 	glColorMask(false, true, true, false);
 	//PlaceSceneElements();
 	glTranslatef(0.0f, 0.0f, zdist);
-	glRotatef(-(mPoolTableTrans.getRotation().getAngle() / SIMD_2_PI) * 180, 1, 0, 0);
+	glRotatef(-(mPoolTableTrans.getRotation().getAngle() / SIMD_2_PI) * 360, 1, 0, 0);
+	glTranslatef(mPoolTableTrans.getOrigin().getX(),
+				 mPoolTableTrans.getOrigin().getY(),
+				 mPoolTableTrans.getOrigin().getZ());
 	mPoolTableDisplayModel->draw();
 	mStereoCam.finishEye();
 	glColorMask(true, true, true, true);
 	mDebugDrawer->setDebugMode(1);
 	mDynamicsWorld->debugDrawWorld();
-	mFpsCounter.frameEnd();
-	return;
-
-	gluLookAt(cam[0], cam[1], cam[2], target[0], target[1], target[2], 0, 1, 0);
-
-	glPushMatrix();
-	glRotatef(-(mPoolTableTrans.getRotation().getAngle() / SIMD_2_PI) * 360, 1, 0, 0);
-	glTranslatef(mPoolTableTrans.getOrigin().getX(),
-				 mPoolTableTrans.getOrigin().getY(),
-				 mPoolTableTrans.getOrigin().getZ());
-	//mPoolTableDisplayModel->draw();
-	glPopMatrix();
-
-	glPushMatrix();
-	glTranslatef(mTrans.getOrigin().getX(),
-				 mTrans.getOrigin().getY(),
-				 mTrans.getOrigin().getZ());
-	gluSphere(mQuadric, 1.3f, 32, 32);
-	glPopMatrix();
-
-	glPushMatrix();
-	glTranslatef(mControllerTrans.getOrigin().getX(),
-				 mControllerTrans.getOrigin().getY(),
-				 mControllerTrans.getOrigin().getZ());
-	gluSphere(mQuadric, 1.3f, 32, 32);
-	glPopMatrix();
-
-	mDebugDrawer->setDebugMode(1);
-	mDynamicsWorld->debugDrawWorld();
-
 	mFpsCounter.frameEnd();
 }
 
@@ -355,4 +337,9 @@ void Displayer::timeout()
 	mControllerMotionState->setWorldTransform(mControllerTrans);
 	mDynamicsWorld->stepSimulation((float)elapsed / 1000.f, 5);
 	mFallMotionState->getWorldTransform(mTrans);
+}
+
+void Displayer::setRelativeCameraPos(QPointF p)
+{
+	mCameraDiff = p * 20;
 }

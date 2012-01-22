@@ -70,6 +70,7 @@ private:
 	FpsCounter mFpsCounter;
 	QMatrix4x4 mRotation;
 	StereoCamera mStereoCam;
+	QPointF mCameraDiff;
 
 protected:
 	void initializeGL();
@@ -84,6 +85,7 @@ private slots:
 public slots:
 	void update();
 	void moveMarker(QVector3D pos);
+	void setRelativeCameraPos(QPointF p);
 };
 
 #endif // DISPLAYER_H
