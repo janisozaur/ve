@@ -58,6 +58,24 @@ Displayer::Displayer(QWidget *parent) :
 									btCollisionObject::CF_KINEMATIC_OBJECT);
 	mControllerRigidBody->setActivationState(DISABLE_DEACTIVATION);
 	mDynamicsWorld->addRigidBody(mControllerRigidBody);
+
+	for (int i = 0; i < 9; i++) {
+		btCollisionShape *shape = new btSphereShape(1);
+		mBallsShape.append(shape);
+		btMotionState *ms = new btDefaultMotionState(
+					btTransform(btQuaternion(0, 0, 0, 1), btVector3(i * 3, 100, 0)));
+		mBallsMotionState.append(ms);
+		btVector3 ballInertia(0, 0, 0);
+		shape->calculateLocalInertia(mass, ballInertia);
+		btRigidBody::btRigidBodyConstructionInfo *ci =
+			new btRigidBody::btRigidBodyConstructionInfo(mass, ms, shape,
+														 ballInertia);
+		mBallsRigidBodyCI.append(ci);
+		btRigidBody *rigidBody = new btRigidBody(*ci);
+		mBallsRigidBody.append(rigidBody);
+		mDynamicsWorld->addRigidBody(rigidBody);
+	}
+
 	gluQuadricNormals(mQuadric, GLU_SMOOTH);
 
 	light_ambient = new GLfloat[4];
@@ -167,6 +185,12 @@ Displayer::~Displayer()
 	delete mFallMotionState;
 	delete mFallRigidBody;
 	delete mFallRigidBodyCI;
+	for (int i = 0; i < mBallsRigidBody.size(); i++) {
+		delete mBallsShape.at(i);
+		delete mBallsMotionState.at(i);
+		delete mBallsRigidBody.at(i);
+		delete mBallsRigidBodyCI.at(i);
+	}
 	delete mGroundRigidBody;
 	delete mGroundMotionState;
 	delete mDynamicsWorld;

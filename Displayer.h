@@ -52,6 +52,11 @@ private:
 	btRigidBody::btRigidBodyConstructionInfo *mFallRigidBodyCI;
 	btRigidBody* mFallRigidBody;
 
+	QVector<btRigidBody *> mBallsRigidBody;
+	QVector<btRigidBody::btRigidBodyConstructionInfo *> mBallsRigidBodyCI;
+	QVector<btMotionState *> mBallsMotionState;
+	QVector<btCollisionShape *> mBallsShape;
+
 	btDefaultMotionState* mControllerMotionState;
 	btRigidBody::btRigidBodyConstructionInfo *mControllerRigidBodyCI;
 	btRigidBody* mControllerRigidBody;
