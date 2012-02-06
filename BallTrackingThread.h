@@ -41,6 +41,7 @@ signals:
     void showImage();
 
 public slots:
+	void getProperty();
     int scanEmptyHue(const int &spread) const;
 };
 

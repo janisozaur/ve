@@ -225,3 +225,12 @@ int BallTrackingThread::scanEmptyHue(const int &radius) const
 	qDebug() << values.mid(85, 10);
 	return idx;
 }
+
+void BallTrackingThread::getProperty()
+{
+	static int i = 0;
+	qDebug() << i++;
+	qDebug() << "gain" << mCapture.get(CV_CAP_PROP_GAIN)
+			 << "exp" << mCapture.get(CV_CAP_PROP_EXPOSURE)
+			 << "auto" << mCapture.get(CV_CAP_PROP_AUTO_EXPOSURE);
+}
