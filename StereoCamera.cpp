@@ -73,3 +73,10 @@ float StereoCamera::far() const
 {
 	return mFarClippingDistance;
 }
+
+void StereoCamera::setAspectRatio(const float &ar)
+{
+	mAspectRatio            = ar;
+	const float fovTan = tan(mFOV/2);
+	mA = mAspectRatio * fovTan * mConvergence;
+}

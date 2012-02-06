@@ -20,6 +20,7 @@ public:
 
 	void beginEye(const Eye &e) const;
 	void finishEye() const;
+	void setAspectRatio(const float &ar);
 	float fov() const;
 	float aspect() const;
 	float near() const;
