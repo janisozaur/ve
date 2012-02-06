@@ -3,6 +3,7 @@
 
 #include "FPSCounter.h"
 #include "StereoCamera.h"
+#include "MoveData.h"
 
 #include <QGLWidget>
 #ifdef Q_OS_LINUX
@@ -30,6 +31,8 @@ public:
 	QString getGLInfo();
 
 private:
+	void setGrayMaterial(const float &grayness) const;
+
 	QColor mBackgroundColor;
 
 	// Bullet Physics variables, as seen on
@@ -76,6 +79,11 @@ private:
 	QMatrix4x4 mRotation;
 	StereoCamera mStereoCam;
 	QPointF mCameraDiff;
+	MoveData mPrevMoveData;
+	bool mTriggerPressed;
+	float mMaxPush;
+	QVector<float> mMeasurments;
+	QPointF mTopRight, mBottomLeft;
 
 protected:
 	void initializeGL();
@@ -83,14 +91,19 @@ protected:
 	void resizeGL(int w, int h);
 
 signals:
+	void push(float pushVal);
 
 private slots:
 	void timeout();
+	void hitBall(float force);
 
 public slots:
 	void update();
 	void moveMarker(QVector3D pos);
 	void setRelativeCameraPos(QPointF p);
+	void receiveData(MoveData d);
+	void setTopRightCorner(QPointF p);
+	void setBottomLeftCorner(QPointF p);
 };
 
 #endif // DISPLAYER_H

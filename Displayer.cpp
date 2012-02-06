@@ -28,7 +28,7 @@ Displayer::Displayer(QWidget *parent) :
 	mGroundRigidBodyCI(0, mGroundMotionState, mGroundShape, btVector3(0, 0, 0)),
 	mGroundRigidBody(new btRigidBody(mGroundRigidBodyCI)),
 	mFallMotionState(new btDefaultMotionState(
-			btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 100, 0)))),
+			btTransform(btQuaternion(0, 0, 0, 1), btVector3(-3, 100, 0)))),
 	mControllerMotionState(new btDefaultMotionState(
 			btTransform(btQuaternion(0, 0, 0, 1), btVector3(1.25f, 1, 0)))),
 	mQuadric(gluNewQuadric()),
@@ -37,7 +37,8 @@ Displayer::Displayer(QWidget *parent) :
 			   1.3333f,     // Aspect Ratio
 			   45.0f,       // FOV along Y in degrees
 			   10.0f,       // Near Clipping Distance
-			   2000.0f)   // Far Clipping Distance)
+			   2000.0f),   // Far Clipping Distance)
+  mTriggerPressed(false)
 {
 	mBackgroundColor.setRgb(qRgb(100, 100, 100));
 	mPoolTableCollider = NULL;
@@ -74,6 +75,8 @@ Displayer::Displayer(QWidget *parent) :
 		btRigidBody *rigidBody = new btRigidBody(*ci);
 		mBallsRigidBody.append(rigidBody);
 		mDynamicsWorld->addRigidBody(rigidBody);
+		rigidBody->setDamping(0.1, 0.1);
+		rigidBody->setFriction(0.1);
 	}
 
 	gluQuadricNormals(mQuadric, GLU_SMOOTH);
@@ -154,12 +157,14 @@ Displayer::Displayer(QWidget *parent) :
 	mDynamicsWorld->addRigidBody(mPoolTableRigidBody);
 	mPoolTableRigidBody->setFriction(1.0f);
 	mFallRigidBody->setFriction(1.0f);
-	mFallRigidBody->setDamping(0.0f, 0.5f);
+	mFallRigidBody->setDamping(0.1f, 0.8f);
 	qDebug() << "table friction:" << mPoolTableRigidBody->getFriction() << "linear damping:" << mPoolTableRigidBody->getLinearDamping() << "angular damping:" << mPoolTableRigidBody->getAngularDamping();
 	qDebug() << "ball friction:" << mFallRigidBody->getFriction() << "linear damping:" << mFallRigidBody->getLinearDamping() << "angular damping:" << mFallRigidBody->getAngularDamping();
 
 	mDebugDrawer = new GLDebugDrawer;
 	mDynamicsWorld->setDebugDrawer(mDebugDrawer);
+
+	connect(this, SIGNAL(push(float)), this, SLOT(hitBall(float)));
 }
 
 Displayer::~Displayer()
@@ -255,6 +260,7 @@ void Displayer::resizeGL(int w, int h)
 	mHeight = h;
 	glViewport(0, 0, (GLint)w, (GLint)h);
 	qDebug() << "resize (" << w << ", " << h << ")";
+	mStereoCam.setAspectRatio(float(w) / float(h));
 }
 
 void PlaceSceneElements()
@@ -316,25 +322,82 @@ void Displayer::paintGL()
 	glColorMask(true, false, false, false);
 	//PlaceSceneElements();
 	glTranslatef(0.0f, 0.0f, zdist);
+	glPushMatrix();
 	glRotatef(-(mPoolTableTrans.getRotation().getAngle() / SIMD_2_PI) * 360, 1, 0, 0);
-	glTranslatef(mPoolTableTrans.getOrigin().getX(),
-				 mPoolTableTrans.getOrigin().getY(),
-				 mPoolTableTrans.getOrigin().getZ());
-	mPoolTableDisplayModel->draw();
+		glTranslatef(mPoolTableTrans.getOrigin().getX(),
+					 mPoolTableTrans.getOrigin().getY(),
+					 mPoolTableTrans.getOrigin().getZ());
+		mPoolTableDisplayModel->draw();
+	glPopMatrix();
+	glPushMatrix();
+		glTranslatef(mTrans.getOrigin().getX(),
+					 mTrans.getOrigin().getY(),
+					 mTrans.getOrigin().getZ());
+		setGrayMaterial(1.0f);
+		gluSphere(mQuadric, 1.3f, 32, 32);
+		setGrayMaterial(0.5f);
+	glPopMatrix();
+	for (int i = 0; i < mBallsMotionState.size(); i++) {
+		glPushMatrix();
+			btTransform t;
+			mBallsMotionState.at(i)->getWorldTransform(t);
+			glTranslatef(t.getOrigin().getX(),
+						 t.getOrigin().getY(),
+						 t.getOrigin().getZ());
+			gluSphere(mQuadric, 1.3f, 32, 32);
+		glPopMatrix();
+	}
 	mStereoCam.finishEye();
 	glClear(GL_DEPTH_BUFFER_BIT);
 	mStereoCam.beginEye(StereoCamera::Right);
 	glColorMask(false, true, true, false);
 	//PlaceSceneElements();
 	glTranslatef(0.0f, 0.0f, zdist);
+	glPushMatrix();
 	glRotatef(-(mPoolTableTrans.getRotation().getAngle() / SIMD_2_PI) * 360, 1, 0, 0);
-	glTranslatef(mPoolTableTrans.getOrigin().getX(),
-				 mPoolTableTrans.getOrigin().getY(),
-				 mPoolTableTrans.getOrigin().getZ());
-	mPoolTableDisplayModel->draw();
+		glTranslatef(mPoolTableTrans.getOrigin().getX(),
+					 mPoolTableTrans.getOrigin().getY(),
+					 mPoolTableTrans.getOrigin().getZ());
+		mPoolTableDisplayModel->draw();
+	glPopMatrix();
+	glPushMatrix();
+		glTranslatef(mTrans.getOrigin().getX(),
+					 mTrans.getOrigin().getY(),
+					 mTrans.getOrigin().getZ());
+		setGrayMaterial(1.0f);
+		gluSphere(mQuadric, 1.3f, 32, 32);
+		setGrayMaterial(0.5f);
+	glPopMatrix();
+	for (int i = 0; i < mBallsMotionState.size(); i++) {
+		glPushMatrix();
+			btTransform t;
+			mBallsMotionState.at(i)->getWorldTransform(t);
+			glTranslatef(t.getOrigin().getX(),
+						 t.getOrigin().getY(),
+						 t.getOrigin().getZ());
+			gluSphere(mQuadric, 1.3f, 32, 32);
+		glPopMatrix();
+	}
 	mStereoCam.finishEye();
 	glColorMask(true, true, true, true);
+
 	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+		glLoadIdentity();
+		glMatrixMode(GL_MODELVIEW);
+		setGrayMaterial(0);
+		glLoadIdentity();
+		gluOrtho2D(-1, 1, -1, 1);
+		glDisable(GL_DEPTH_TEST);
+		glBegin(GL_LINES);
+			glVertex2d(-1, 0);
+			glVertex2d(1, 0);
+			glVertex2d(0, 1);
+			glVertex2d(0, -1);
+		glEnd();
+		glEnable(GL_DEPTH_TEST);
+	glPopMatrix();
+
 	gluPerspective(mStereoCam.fov(), mStereoCam.aspect(), mStereoCam.near(),
 				   mStereoCam.far());
 	glMatrixMode(GL_MODELVIEW);
@@ -370,4 +433,60 @@ void Displayer::timeout()
 void Displayer::setRelativeCameraPos(QPointF p)
 {
 	mCameraDiff = p * 20;
+}
+
+void Displayer::receiveData(MoveData d)
+{
+	if (mPrevMoveData.buttons.trigger <= 100 && d.buttons.trigger > 100) {
+		qDebug() << "trigger pressed";
+		mTriggerPressed = true;
+		mMaxPush = 0;
+	} else if (mTriggerPressed && d.buttons.trigger <= 100) {
+		mTriggerPressed = false;
+		qDebug() << "push:" << mMaxPush;
+	}
+	if (mTriggerPressed) {
+		mMeasurments = mMeasurments.mid(1, 9);
+		mMeasurments.append(d.accelerometer.z());
+		float sum = 0;
+		for (int i = 0; i < mMeasurments.size(); i++) {
+			sum += mMeasurments.at(i);
+		}
+		if (d.accelerometer.z() > mMaxPush) {
+			mMaxPush = d.accelerometer.z();
+		}
+		if (sum > 5000) {
+			mTriggerPressed = false;
+			qDebug() << "sum" << sum;
+			emit push(mMaxPush);
+		}
+	}
+	mPrevMoveData = d;
+}
+
+void Displayer::hitBall(float force)
+{
+	qDebug() << "ball hit with force" << force;
+	mFallRigidBody->applyCentralForce(btVector3(500, 0, 100));
+}
+
+void Displayer::setGrayMaterial(const float &grayness) const
+{
+	const float a[] = {grayness, grayness, grayness, 1.0};
+	const float d[] = {grayness, grayness, grayness, 1.0};
+	const float s[] = {grayness, grayness, grayness, 1.0};
+	glMaterialfv(GL_FRONT, GL_AMBIENT, a);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, d);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, s);
+	glMaterialf(GL_FRONT, GL_SHININESS, pow(2, 10.0 * 0.5));
+}
+
+void Displayer::setTopRightCorner(QPointF p)
+{
+	mTopRight = p;
+}
+
+void Displayer::setBottomLeftCorner(QPointF p)
+{
+	mBottomLeft = p;
 }
