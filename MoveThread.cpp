@@ -345,6 +345,7 @@ void MoveThread::readReport(int fd)
 			}
 			if (tmp.at(2) & 0x08) {
 				b.buttonsPressed.append(MoveButtons::Start);
+				emit startClicked();
 			}
 			if (tmp.at(3) & 0x10) {
 				b.buttonsPressed.append(MoveButtons::Triangle);

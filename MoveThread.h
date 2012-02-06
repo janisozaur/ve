@@ -64,6 +64,7 @@ signals:
 	void setButtons(MoveButtons buttons);
 	void dataReceived(MoveData d);
 	void setAxes(QVector3D one, QVector3D two, QVector3D three);
+	void startClicked();
 
 public slots:
 	void activated(int fd);
