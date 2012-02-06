@@ -20,7 +20,7 @@ using namespace cv;
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow),
-	mBallTracker(nullptr), mMoveThread(nullptr), mMoveForm(nullptr)
+	mBallTracker(nullptr), mMoveThread(nullptr), mMoveForm(nullptr), mWMT(nullptr), mGLForm(nullptr), mDisplayer(nullptr)
 {
 	ui->setupUi(this);
 	qRegisterMetaType<MoveButtons>("MoveButtons");
@@ -30,8 +30,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	int argc = 0;
 	char *argv = nullptr;
 	glutInit(&argc, &argv);
-	mGLForm = new GLForm();
-	mGLForm->show();
+//	mGLForm = new GLForm();
+//	mGLForm->show();
 	mDisplayer = new Displayer();
 	mDisplayer->show();
 	mWMT = new WiiMarkerTracker(&mWiiSemaphore, qobject_cast<QObject *>(this));
@@ -53,6 +53,9 @@ void MainWindow::on_pushButton_clicked()
 	connect(mBallTracker, SIGNAL(showImage()), this, SLOT(showImage()));
 	mBallTracker->start();
 	ui->pushButton->setEnabled(false);
+	if (mMoveThread != nullptr) {
+		connect(mMoveThread, SIGNAL(startClicked()), mBallTracker, SLOT(getProperty()));
+	}
 }
 
 void MainWindow::showImage()
@@ -104,9 +107,14 @@ void MainWindow::on_moveConnectPushButton_clicked()
 {
 	mMoveForm = new PSMoveForm();
 	mMoveForm->show();
-	connect(mMoveForm, SIGNAL(setVector(QVector3D)), mGLForm, SLOT(setVector(QVector3D)));
-	connect(mMoveForm, SIGNAL(setMatrix(QMatrix4x4)), mGLForm, SLOT(setMatrix(QMatrix4x4)));
+	if (mGLForm != nullptr) {
+		connect(mMoveForm, SIGNAL(setVector(QVector3D)), mGLForm, SLOT(setVector(QVector3D)));
+		connect(mMoveForm, SIGNAL(setMatrix(QMatrix4x4)), mGLForm, SLOT(setMatrix(QMatrix4x4)));
+	} else {
+		qDebug() << "there is no gl form set, not connecting signals";
+	}
 	mMoveThread = new MoveThread(&mMoveSemaphore, this);
+	connect(mMoveThread, SIGNAL(dataReceived(MoveData)), mDisplayer, SLOT(receiveData(MoveData)));
 	connect(mMoveThread, SIGNAL(dataReceived(MoveData)), mMoveForm, SLOT(parseMoveData(MoveData)));
 	connect(mMoveForm, SIGNAL(setRgb(QColor)), mMoveThread, SLOT(setRGB(QColor)));
 	connect(mMoveForm, SIGNAL(setRumble(quint8)), mMoveThread, SLOT(setRumble(quint8)));
@@ -114,6 +122,9 @@ void MainWindow::on_moveConnectPushButton_clicked()
 	QTimer *t = new QTimer(this);
 	t->start(30);
 	connect(t, SIGNAL(timeout()), this, SLOT(releaseMoveSemaphore()));
+	if (mBallTracker != nullptr) {
+		connect(mMoveThread, SIGNAL(startClicked()), mBallTracker, SLOT(getProperty()));
+	}
 }
 
 void MainWindow::on_scanPushButton_clicked()
