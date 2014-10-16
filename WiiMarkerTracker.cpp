@@ -20,14 +20,15 @@ void WiiMarkerTracker::run()
 	int count;
 	timespec timestamp;
 	while (mRunning) {
-		bool acquired = mSemaphore->tryAcquire(1, 100);
-		if (!acquired) {
-			continue;
-		}
+//		bool acquired = mSemaphore->tryAcquire(1, 100);
+//		if (!acquired) {
+//			continue;
+//		}
 		cwiid_get_mesg(mWiimote, &count, buffer, &timestamp);
+		//qDebug() << "running wii thread, received msgs count:" << count;
 		for (int i = 0; i < count; i++) {
 			if (buffer[i]->type == CWIID_MESG_IR) {
-				for (int j = 0; j < CWIID_IR_SRC_COUNT; j++) {
+				for (int j = 0; j < 1; j++) {
 					if (buffer[i]->ir_mesg.src[j].valid) {
 						quint16 x = buffer[i]->ir_mesg.src[j].pos[CWIID_X];
 						quint16 y = buffer[i]->ir_mesg.src[j].pos[CWIID_Y];
@@ -38,8 +39,6 @@ void WiiMarkerTracker::run()
 						//qDebug() << "new pos" << p;
 
 						emit newPosition(p);
-
-						break;
 					}
 				}
 			}
@@ -61,7 +60,7 @@ bool WiiMarkerTracker::connect(const int &timeout)
 		return false;
 	}
 
-	mWiimote = cwiid_open(&addr, CWIID_FLAG_NONBLOCK);
+	mWiimote = cwiid_open(&addr, CWIID_FLAG_MESG_IFC | CWIID_FLAG_NONBLOCK);
 	result = cwiid_command(mWiimote, CWIID_CMD_RPT_MODE, CWIID_RPT_IR);
 	if (result != 0) {
 		qWarning("Failed to enable IR! disconnecting!\n");

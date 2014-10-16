@@ -51,7 +51,7 @@ void Model::loadTextures()
 		qDebug() << "tried to get faces from nonexistent model";
 		return;
 	}
-	glEnable(GL_TEXTURE_2D);
+//	glEnable(GL_TEXTURE_2D);
 	for (Lib3dsMesh *mesh = mModel->meshes; mesh != NULL; mesh = mesh->next) {
 		// this should equal to 0, as no list for the mesh should exist yet
 		Q_ASSERT(mesh->user.i == 0);
@@ -67,6 +67,7 @@ void Model::loadTextures()
 			if (mat != oldmat) {
 				if (mat != NULL) {
 					QString name = QString(mat->texture1_map.name);
+//					qDebug() << "name:" << name;
 					if (!name.isEmpty()) {
 						Lib3dsTextureMap *tex = &mat->texture1_map;
 						QString texFile = QString(":/textures/%1")
@@ -85,30 +86,30 @@ void Model::loadTextures()
 											  TEX_XSIZE;
 							texInfo->scaleY = (float)(glImg.height()) /
 											  TEX_YSIZE;
-							glGenTextures(1, &texInfo->texId);
+//							glGenTextures(1, &texInfo->texId);
 							// we have a new texture, store it in cache
 							mTexturesMap.insert(name, texInfo);
 							tex->user.p = texInfo;
 							cached = false;
-							glBindTexture(GL_TEXTURE_2D, texInfo->texId);
-							glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, TEX_XSIZE,
-										 TEX_YSIZE, 0, GL_RGBA,
-										 GL_UNSIGNED_BYTE, NULL);
-							glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
-											GL_CLAMP);
-							glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
-											GL_CLAMP);
-							glTexParameteri(GL_TEXTURE_2D,
-											GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-							glTexParameteri(GL_TEXTURE_2D,
-											GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-							glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE,
-									  GL_REPLACE);
-							glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
-											texInfo->glImg.width(),
-											texInfo->glImg.height(), GL_RGBA,
-											GL_UNSIGNED_BYTE,
-											texInfo->glImg.bits());
+//							glBindTexture(GL_TEXTURE_2D, texInfo->texId);
+//							glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, TEX_XSIZE,
+//										 TEX_YSIZE, 0, GL_RGBA,
+//										 GL_UNSIGNED_BYTE, NULL);
+//							glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
+//											GL_CLAMP);
+//							glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
+//											GL_CLAMP);
+//							glTexParameteri(GL_TEXTURE_2D,
+//											GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//							glTexParameteri(GL_TEXTURE_2D,
+//											GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//							glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE,
+//									  GL_REPLACE);
+//							glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
+//											texInfo->glImg.width(),
+//											texInfo->glImg.height(), GL_RGBA,
+//											GL_UNSIGNED_BYTE,
+//											texInfo->glImg.bits());
 						} else {
 							// get cached texture info and assign it to texInfo
 							// (as it is used later on) and tex
@@ -116,18 +117,18 @@ void Model::loadTextures()
 							tex->user.p = texInfo;
 							cached = true;
 						}
-						qDebug() << (QString("uploaded texture %1 (path: \"%2\", id: %3), %4, required by face %5")).arg(
-										name, texFile, QString::number(texInfo->texId), cached ? "cached" : "new",
-										QString::number(cur_face));
+//						qDebug() << (QString("uploaded texture %1 (path: \"%2\", id: %3), %4, required by face %5")).arg(
+//										name, texFile, QString::number(texInfo->texId), cached ? "cached" : "new",
+//										QString::number(cur_face));
 					} else {
-						qDebug() << "texture unloaded in face" << cur_face;
+//						qDebug() << "texture unloaded in face" << cur_face;
 					}
 				}
 				oldmat = mat;
 			}
 		}
 	}
-	glDisable(GL_TEXTURE_2D);
+//	glDisable(GL_TEXTURE_2D);
 }
 
 // Copy vertices and normals to the memory of the GPU
@@ -139,8 +140,8 @@ void Model::createDisplayList(GLfloat scale)
 	}
 
 	if (mTexturesMap.count() == 0) {
-		qDebug() <<
-				"there is no texture cached. did you run loadTextures() first?";
+//		qDebug() <<
+//				"there is no texture cached. did you run loadTextures() first?";
 	}
 
 	// Calculate the number of faces we have in total
@@ -161,7 +162,7 @@ void Model::createDisplayList(GLfloat scale)
 		mesh->user.i = glGenLists(1);
 		Q_ASSERT(mesh->user.i != 0);
 		glNewList(mesh->user.i, GL_COMPILE);
-		//glEnable(GL_TEXTURE_2D);
+//		glEnable(GL_TEXTURE_2D);
 		glBegin(GL_TRIANGLES);
 		qDebug() << "creating gl list" << mesh->user.i;
 		// Loop through every face
@@ -182,7 +183,7 @@ void Model::createDisplayList(GLfloat scale)
 						// that isn't, that's an error
 						Q_ASSERT(texInfo != NULL);
 						// texture binding should be done outside glBegin() .. glEnd()
-						//glBindTexture(GL_TEXTURE_2D, texInfo->texId);
+//						glBindTexture(GL_TEXTURE_2D, texInfo->texId);
 						qDebug() << QString("binding texture %1 (id: %2)").arg(
 										name, QString::number(texInfo->texId));
 					}
@@ -216,13 +217,12 @@ void Model::createDisplayList(GLfloat scale)
 			// TODO: extract all glBindTexture, glBegin and glEnd calls to be
 			// made on per-texture basis. This could involve code marked with
 			// 'texture' tag which is currently commented out.
-			/*
-			 *	// TAG: texture
-			 *	if (texInfo != NULL) {
-			 *		glEnable(GL_TEXTURE_2D);
-			 *		glBindTexture(GL_TEXTURE_2D, texInfo->texId);
-			 *	}
-			 */
+
+			// TAG: texture
+//			if (texInfo != NULL) {
+//				glEnable(GL_TEXTURE_2D);
+//				glBindTexture(GL_TEXTURE_2D, texInfo->texId);
+//			}
 			for (unsigned int i = 0; i < 3; i++) {
 				glNormal3fv(normals[FinishedFaces * 3 + i]);
 				Lib3dsVector pos;
@@ -238,19 +238,17 @@ void Model::createDisplayList(GLfloat scale)
 					float v = texInfo->scaleY -
 							mesh->texelL[face->points[i]][0] * texInfo->scaleY;
 					//qDebug() << FinishedFaces * 3 + i << "u:" << u << "v:" << v;
-					glTexCoord2f(u, v);
+//					glTexCoord2f(u, v);
 				}
 			}
-			/*
-			 * // TAG: texture
-			 *	if (texInfo != NULL) {
-			 *		glDisable(GL_TEXTURE_2D);
-			 *	}
-			 */
+			// TAG: texture
+//			if (texInfo != NULL) {
+//				glDisable(GL_TEXTURE_2D);
+//			}
 			FinishedFaces++;
 		}
 		glEnd();
-		//glDisable(GL_TEXTURE_2D);
+//		glDisable(GL_TEXTURE_2D);
 		glEndList();
 	}
 	//qDebug() << "cnt:" << cnt;

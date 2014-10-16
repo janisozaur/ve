@@ -16,7 +16,9 @@
 PSMoveForm::PSMoveForm(QWidget *parent) :
 	QWidget(parent),
 	ui(new Ui::PSMoveForm),
-	mPrevMovePressed(false)
+	mPrevMovePressed(false),
+	mPrevTriPressed(false),
+	mPrevSquPressed(false)
 {
 	ui->setupUi(this);
 	mBatteryLayout = new QStackedLayout(ui->batteryContainerWidget);
@@ -98,8 +100,8 @@ void PSMoveForm::parseMoveData(MoveData d)
 	//normalisedMag = QVector3D::crossProduct(normalisedMag.normalized(), normalisedAcc).normalized();
 	//QVector3D north = QVector3D::crossProduct(normalisedMag, normalisedAcc).normalized();
 
-	bool movePressed = d.buttons.buttonsPressed.contains(MoveButtons::Move);
-	if (!mPrevMovePressed && movePressed) {
+	bool movePressedB = d.buttons.buttonsPressed.contains(MoveButtons::Move);
+	if (!mPrevMovePressed && movePressedB) {
 
 		//mOne = normalisedAcc;
 		//mTwo = normalisedMag;
@@ -107,8 +109,9 @@ void PSMoveForm::parseMoveData(MoveData d)
 
 		qDebug() << "acc:" << d.accelerometer;
 		qDebug() << "mag:" << d.mag;
+		emit movePressed();
 	}
-	mPrevMovePressed = movePressed;
+	mPrevMovePressed = movePressedB;
 	/*float one = std::acos(QVector3D::dotProduct(normalisedAcc, mOne));
 	float two = std::acos(QVector3D::dotProduct(normalisedMag, mTwo));
 	float three = std::acos(QVector3D::dotProduct(north, mThree));*/
@@ -135,6 +138,17 @@ void PSMoveForm::parseMoveData(MoveData d)
 		ui->magZProgressBar->setValue(d.mag.z());
 	}
 
+	bool triPressed = d.buttons.buttonsPressed.contains(MoveButtons::Triangle);
+	if (triPressed && !mPrevTriPressed) {
+		emit setTopRightCorner();
+	}
+	mPrevTriPressed = triPressed;
+
+	bool squPressed = d.buttons.buttonsPressed.contains(MoveButtons::Square);
+	if (squPressed && !mPrevSquPressed) {
+		emit setBottomLeftCorner();
+	}
+	mPrevSquPressed = squPressed;
 #if 0
 	QVector3D acc = d.accelerometer;
 	QVector3D mag = d.mag;

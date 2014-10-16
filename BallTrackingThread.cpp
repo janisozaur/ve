@@ -11,7 +11,7 @@ using namespace cv;
 BallTrackingThread::BallTrackingThread(QObject *parent) :
 	QThread(parent), mDilutionIterations(0), mErosionIterations(0), mRunning(true),
 	mLower(QColor::fromHsv(200, 50, 80)), mUpper(QColor::fromHsv(220, 255, 255)),
-	mHue(95), mRadius(10)
+	mHue(95), mRadius(10), mSetTRFlag(false), mSetBLFlag(false)
 {
 	if (!mCapture.open(0)) {
 		this->mRunning = false;
@@ -130,20 +130,29 @@ void BallTrackingThread::run()
 		//qDebug() << "beep" << mDilutionIterations << mErosionIterations;
 		Mat frame;
 		mCapture >> frame;
+		mStorage.resize(0);
 		// Show the image captured from the camera in the window and repeat
 		// Get one frame
 		mCapture >> frame;
 		Mat threshed = GetThresholdedImage(frame);
-		std::vector<Vec3f> storage;
 		erode(threshed, threshed, Mat(), Point(-1, -1), mDilutionIterations);
 		dilate(threshed, threshed, Mat(), Point(-1, -1), mErosionIterations);
 
 		GaussianBlur(threshed, threshed, Size(9,9), 2, 2);
-		HoughCircles(threshed, storage, CV_HOUGH_GRADIENT, 2, threshed.cols, 150, 50);
+		HoughCircles(threshed, mStorage, CV_HOUGH_GRADIENT, 2, threshed.cols + threshed.rows, 150, 50);
 		//qDebug() << "size" << storage.size();
-		for (size_t i = 0; i < storage.size(); i++) {
+		for (size_t i = 0; i < mStorage.size(); i++) {
 			//qDebug() << "circle:" << storage[i][0] << ", " << storage[i][1] << ", " << storage[i][2];
-			circle(frame, Point2f(storage[i][0], storage[i][1]), storage[i][2], color, 2);
+			circle(frame, Point2f(mStorage[i][0], mStorage[i][1]), mStorage[i][2], color, 2);
+			QPoint p(mStorage.at(i)[0], mStorage.at(i)[1]);
+			if (mSetTRFlag) {
+				mSetTRFlag = false;
+				emit setTopRightCorner(p);
+			} else if (mSetBLFlag) {
+				mSetBLFlag = false;
+				emit setBottomLeftCorner(p);
+			}
+			emit setCurrent(p);
 		}
 		flip(frame, frame, 1);
 		flip(threshed, threshed, 1);
@@ -152,7 +161,7 @@ void BallTrackingThread::run()
 		map["thresh"] = threshed;
 		//qDebug() << "non zero:" << countNonZero(threshed);
 		showImage();
-		QCoreApplication::processEvents();
+		//QCoreApplication::processEvents();
 	}
 }
 
@@ -233,4 +242,14 @@ void BallTrackingThread::getProperty()
 	qDebug() << "gain" << mCapture.get(CV_CAP_PROP_GAIN)
 			 << "exp" << mCapture.get(CV_CAP_PROP_EXPOSURE)
 			 << "auto" << mCapture.get(CV_CAP_PROP_AUTO_EXPOSURE);
+}
+
+void BallTrackingThread::setBottomLeftCorner()
+{
+	mSetBLFlag = true;
+}
+
+void BallTrackingThread::setTopRightCorner()
+{
+	mSetTRFlag = true;
 }

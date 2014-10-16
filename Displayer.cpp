@@ -7,6 +7,7 @@
 #include <QTemporaryFile>
 #include <GL/glu.h>
 #include <GL/freeglut.h>
+#include <cmath>
 
 #include <QDebug>
 
@@ -302,9 +303,12 @@ void Displayer::paintGL()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ACCUM_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 	glLoadIdentity();
-	gluLookAt(0 + mCameraDiff.x(), 100 + mCameraDiff.y(), 0,
+	gluLookAt(0 + mCameraDiff.x(), 100, 0 + mCameraDiff.y(),
 			  0, 1, 0,
 			  0, 0, 1);
+//	gluLookAt(mCameraDiff.x() - 15, 25, 0,
+//			  30, 20, 0,
+//			  0, 1, 0);
 	btVector3 cam(0, 70, -30);
 	btVector3 target = mPoolTableTrans.getOrigin();
 	btVector3 cam2obj = target - cam;
@@ -347,6 +351,20 @@ void Displayer::paintGL()
 			gluSphere(mQuadric, 1.3f, 32, 32);
 		glPopMatrix();
 	}
+
+	glDisable(GL_DEPTH_TEST);
+	setGrayMaterial(0.1f);
+	glPushMatrix();
+		glTranslatef(mPointer.x(), mTrans.getOrigin().y(), mPointer.y());
+		gluSphere(mQuadric, 0.8f, 32, 32);
+	glPopMatrix();
+	glPushMatrix();
+		glTranslatef(mTrans.getOrigin().x(), mTrans.getOrigin().y(), mTrans.getOrigin().z());
+		glRotatef(- mAngle - 90, 0, 1, 0);
+		gluCylinder(mQuadric, 1, 1, 10, 2, 2);
+	glPopMatrix();
+	glEnable(GL_DEPTH_TEST);
+
 	mStereoCam.finishEye();
 	glClear(GL_DEPTH_BUFFER_BIT);
 	mStereoCam.beginEye(StereoCamera::Right);
@@ -378,25 +396,41 @@ void Displayer::paintGL()
 			gluSphere(mQuadric, 1.3f, 32, 32);
 		glPopMatrix();
 	}
+
+	glDisable(GL_DEPTH_TEST);
+	setGrayMaterial(0.1f);
+	glPushMatrix();
+		glTranslatef(mPointer.x(), mTrans.getOrigin().y(), mPointer.y());
+		gluSphere(mQuadric, 0.8f, 32, 32);
+	glPopMatrix();
+	glPushMatrix();
+		glTranslatef(mTrans.getOrigin().x(), mTrans.getOrigin().y(), mTrans.getOrigin().z());
+		glRotatef(- mAngle - 90, 0, 1, 0);
+		gluCylinder(mQuadric, 1, 1, 10, 2, 2);
+	glPopMatrix();
+	glEnable(GL_DEPTH_TEST);
+
 	mStereoCam.finishEye();
 	glColorMask(true, true, true, true);
 
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-		glLoadIdentity();
-		glMatrixMode(GL_MODELVIEW);
-		setGrayMaterial(0);
-		glLoadIdentity();
-		gluOrtho2D(-1, 1, -1, 1);
-		glDisable(GL_DEPTH_TEST);
-		glBegin(GL_LINES);
-			glVertex2d(-1, 0);
-			glVertex2d(1, 0);
-			glVertex2d(0, 1);
-			glVertex2d(0, -1);
-		glEnd();
-		glEnable(GL_DEPTH_TEST);
-	glPopMatrix();
+	if (mTopRight != mBottomLeft) {
+		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
+			glLoadIdentity();
+			glMatrixMode(GL_MODELVIEW);
+			setGrayMaterial(0);
+			glLoadIdentity();
+			gluOrtho2D(0, 1, 0, 1);
+			glDisable(GL_DEPTH_TEST);
+			glBegin(GL_LINES);
+				glVertex2d(0, mPointer.y());
+				glVertex2d(1, mPointer.y());
+				glVertex2d(mPointer.x(), 1);
+				glVertex2d(mPointer.x(), 0);
+			glEnd();
+			glEnable(GL_DEPTH_TEST);
+		glPopMatrix();
+	}
 
 	gluPerspective(mStereoCam.fov(), mStereoCam.aspect(), mStereoCam.near(),
 				   mStereoCam.far());
@@ -428,11 +462,20 @@ void Displayer::timeout()
 	mControllerMotionState->setWorldTransform(mControllerTrans);
 	mDynamicsWorld->stepSimulation((float)elapsed / 1000.f, 5);
 	mFallMotionState->getWorldTransform(mTrans);
+	if (mTrans.getOrigin().y() < 10) {
+		delete mFallMotionState;
+		mFallMotionState = new btDefaultMotionState(
+					btTransform(btQuaternion(0, 0, 0, 1), btVector3(-3, 100, 0)));
+		mFallRigidBody->setMotionState(mFallMotionState);
+		mFallRigidBody->setAngularVelocity(btVector3(0, 0, 0));
+		mFallRigidBody->setLinearVelocity(btVector3(0, 0, 0));
+	}
 }
 
 void Displayer::setRelativeCameraPos(QPointF p)
 {
 	mCameraDiff = p * 20;
+	mCameraDiff.ry() += 20;
 }
 
 void Displayer::receiveData(MoveData d)
@@ -467,7 +510,13 @@ void Displayer::receiveData(MoveData d)
 void Displayer::hitBall(float force)
 {
 	qDebug() << "ball hit with force" << force;
-	mFallRigidBody->applyCentralForce(btVector3(500, 0, 100));
+	QVector3D f(0, 0, 1);
+	QMatrix4x4 r;
+	r.rotate(mAngle - 90, 0, 1, 0);
+	f = f * r;
+	f *= 1000;
+	//force / 100
+	mFallRigidBody->applyCentralForce(btVector3(f.x(), f.y(), f.z()));
 }
 
 void Displayer::setGrayMaterial(const float &grayness) const
@@ -489,4 +538,30 @@ void Displayer::setTopRightCorner(QPointF p)
 void Displayer::setBottomLeftCorner(QPointF p)
 {
 	mBottomLeft = p;
+}
+
+void Displayer::setCurrent(QPointF p)
+{
+	if (!mTriggerPressed) {
+		mCurrent = p;
+	}
+	if (mTopRight != mBottomLeft) {
+		float x = (mCurrent.x() - mBottomLeft.x()) / (mTopRight.x() - mBottomLeft.x());
+		float y = (mCurrent.y() - mBottomLeft.y()) / (mTopRight.y() - mBottomLeft.y());
+		x -= 0.5;
+		y -= 0.5;
+		x *= -60;
+		y *= 30;
+		mPointer = QPointF(x, y);
+		//QPointF pt(mTrans.getOrigin().x(), -mTrans.getOrigin().z());
+		//QLineF l(mPointer, pt);
+		//mAngle = l.angle();
+		mAngle = atan2(mPointer.y() - mTrans.getOrigin().z(), mPointer.x() - mTrans.getOrigin().x()) * 180 * M_1_PI;
+	}
+}
+
+void Displayer::outputCurrent()
+{
+	qDebug() << "ball is at (" << mTrans.getOrigin().x() << ","
+			 << mTrans.getOrigin().y() << "," << mTrans.getOrigin().z() << ")";
 }

@@ -13,11 +13,12 @@ LIBS += -lbluetooth -lgomp -lGLU -lglut -l3ds -L/usr/local/lib -lBulletSoftBody 
         -lBulletDynamics -lBulletCollision -lLinearMath -lopencv_core \
         -lopencv_imgproc -lopencv_highgui -lopencv_ml -lopencv_video \
         -lopencv_features2d -lopencv_calib3d -lopencv_objdetect -lopencv_contrib \
-        -lopencv_legacy -lopencv_flann -lcwiid
+        -lopencv_legacy -lopencv_flann -lcwiid -lpocketsphinx -lsphinxbase -lsphinxad -L/usr/local/lib
 
 QMAKE_CXXFLAGS += -std=gnu++0x -fopenmp
 
 INCLUDEPATH += /usr/include/opencv2 /usr/local/include/bullet/
+INCLUDEPATH += /usr/local/include/sphinxbase /usr/local/include/pocketsphinx
 
 SOURCES += main.cpp\
         MainWindow.cpp \
@@ -34,7 +35,8 @@ SOURCES += main.cpp\
     GLDebugFont.cpp \
     FPSCounter.cpp \
     StereoCamera.cpp \
-    WiiMarkerTracker.cpp
+    WiiMarkerTracker.cpp \
+    SpeechRecognition.cpp
 
 HEADERS  += MainWindow.h \
     BallTrackingThread.h \
@@ -53,7 +55,8 @@ HEADERS  += MainWindow.h \
     GLDebugFont.h \
     FPSCounter.h \
     StereoCamera.h \
-    WiiMarkerTracker.h
+    WiiMarkerTracker.h \
+    SpeechRecognition.h
 
 FORMS    += MainWindow.ui \
     PSMoveForm.ui \

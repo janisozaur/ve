@@ -7,6 +7,7 @@
 #include "GLForm.h"
 #include "Displayer.h"
 #include "WiiMarkerTracker.h"
+#include "SpeechRecognition.h"
 
 #include <highgui/highgui.hpp>
 #include <QColorDialog>
@@ -20,7 +21,7 @@ using namespace cv;
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow),
-	mBallTracker(nullptr), mMoveThread(nullptr), mMoveForm(nullptr), mWMT(nullptr), mGLForm(nullptr), mDisplayer(nullptr)
+	mBallTracker(nullptr), mMoveThread(nullptr), mMoveForm(nullptr), mWMT(nullptr), mGLForm(nullptr), mDisplayer(nullptr), mSpeech(nullptr)
 {
 	ui->setupUi(this);
 	qRegisterMetaType<MoveButtons>("MoveButtons");
@@ -40,6 +41,10 @@ MainWindow::MainWindow(QWidget *parent) :
 	QTimer *t = new QTimer(this);
 	t->start(50);
 	connect(t, SIGNAL(timeout()), this, SLOT(releaseWiiSemaphore()));
+	mSpeech = new SpeechRecognition(this);
+	bool sp = mSpeech->init("/dev/dsp");
+	qDebug() << "speech:" << sp;
+	connect(mSpeech, SIGNAL(fullscreen()), mDisplayer, SLOT(showFullScreen()));
 }
 
 MainWindow::~MainWindow()
@@ -53,9 +58,7 @@ void MainWindow::on_pushButton_clicked()
 	connect(mBallTracker, SIGNAL(showImage()), this, SLOT(showImage()));
 	mBallTracker->start();
 	ui->pushButton->setEnabled(false);
-	if (mMoveThread != nullptr) {
-		connect(mMoveThread, SIGNAL(startClicked()), mBallTracker, SLOT(getProperty()));
-	}
+	connectSignals();
 }
 
 void MainWindow::showImage()
@@ -122,8 +125,21 @@ void MainWindow::on_moveConnectPushButton_clicked()
 	QTimer *t = new QTimer(this);
 	t->start(30);
 	connect(t, SIGNAL(timeout()), this, SLOT(releaseMoveSemaphore()));
-	if (mBallTracker != nullptr) {
+	connectSignals();
+}
+
+void MainWindow::connectSignals()
+{
+	if (mMoveThread != nullptr) {
+		connect(mMoveThread, SIGNAL(outputCurrent()), mDisplayer, SLOT(outputCurrent()));
+	}
+	if (mBallTracker != nullptr && mMoveThread != nullptr) {
 		connect(mMoveThread, SIGNAL(startClicked()), mBallTracker, SLOT(getProperty()));
+		connect(mMoveForm, SIGNAL(setTopRightCorner()), mBallTracker, SLOT(setTopRightCorner()));
+		connect(mMoveForm, SIGNAL(setBottomLeftCorner()), mBallTracker, SLOT(setBottomLeftCorner()));
+		connect(mBallTracker, SIGNAL(setTopRightCorner(QPointF)), mDisplayer, SLOT(setTopRightCorner(QPointF)));
+		connect(mBallTracker, SIGNAL(setBottomLeftCorner(QPointF)), mDisplayer, SLOT(setBottomLeftCorner(QPointF)));
+		connect(mBallTracker, SIGNAL(setCurrent(QPointF)), mDisplayer, SLOT(setCurrent(QPointF)));
 	}
 }
 

@@ -10,6 +10,7 @@ class PSMoveForm;
 class GLForm;
 class Displayer;
 class WiiMarkerTracker;
+class SpeechRecognition;
 
 namespace Ui {
 	class MainWindow;
@@ -45,6 +46,8 @@ private slots:
 	void releaseMoveSemaphore();
 
 private:
+	void connectSignals();
+
 	Ui::MainWindow *ui;
 	BallTrackingThread *mBallTracker;
 	MoveThread *mMoveThread;
@@ -54,6 +57,7 @@ private:
 	Displayer *mDisplayer;
 	QSemaphore mWiiSemaphore;
 	QSemaphore mMoveSemaphore;
+	SpeechRecognition *mSpeech;
 };
 
 #endif // MAINWINDOW_H

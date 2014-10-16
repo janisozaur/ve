@@ -355,6 +355,7 @@ void MoveThread::readReport(int fd)
 			}
 			if (tmp.at(3) & 0x40) {
 				b.buttonsPressed.append(MoveButtons::Cross);
+				emit outputCurrent();
 			}
 			if (tmp.at(3) & 0x80) {
 				b.buttonsPressed.append(MoveButtons::Square);

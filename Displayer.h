@@ -83,7 +83,8 @@ private:
 	bool mTriggerPressed;
 	float mMaxPush;
 	QVector<float> mMeasurments;
-	QPointF mTopRight, mBottomLeft;
+	QPointF mTopRight, mBottomLeft, mCurrent, mPointer;
+	int mAngle;
 
 protected:
 	void initializeGL();
@@ -104,6 +105,8 @@ public slots:
 	void receiveData(MoveData d);
 	void setTopRightCorner(QPointF p);
 	void setBottomLeftCorner(QPointF p);
+	void setCurrent(QPointF p);
+	void outputCurrent();
 };
 
 #endif // DISPLAYER_H
